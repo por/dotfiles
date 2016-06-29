@@ -46,7 +46,7 @@ need_push () {
   then
     echo " "
   else
-    echo "%{$fg[yellow]%}[%{$reset_color%}%{$fg[yellow]%}unpushed%{$reset_color%}%{$fg[yellow]%}]%{$reset_color%} "
+    echo "%{$fg[yellow]%}[%{$reset_color%}%{$fg[red]%}unpushed%{$reset_color%}%{$fg[yellow]%}]%{$reset_color%} "
   fi
 }
 
