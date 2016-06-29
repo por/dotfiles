@@ -23,6 +23,7 @@
     fontFamily: "Menlo"
     invisibles: {}
     showIndentGuide: true
+    showInvisibles: true
     softWrapAtPreferredLineLength: true
   "spell-check":
     grammars: [
