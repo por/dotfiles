@@ -13,7 +13,7 @@ git_branch() {
 
 git_dirty() {
   GIT_PROMPT_PREFIX="%{$reset_color%}%{$fg[yellow]%}("
-  GIT_PROMPT_SUFFIX="%{$fg[yellow]%})%{$reset_color%}$(need_push) "
+  GIT_PROMPT_SUFFIX="%{$fg[yellow]%})%{$reset_color%}$(need_push)"
   GIT_PROMPT_CLEAN="%{$fg[green]%}*"
   GIT_PROMPT_DIRTY="%{$fg[red]%}*"
   GIT_PROMPT_UNTRACKED="%{$fg[cyan]%}*"
@@ -46,7 +46,7 @@ need_push () {
   then
     echo " "
   else
-    echo "%{$fg[yellow]%}[%{$reset_color%}%{$fg[yellow]%}unpushed%{$reset_color%}%{$fg[yellow]%}]%{$reset_color%}"
+    echo "%{$fg[yellow]%}[%{$reset_color%}%{$fg[yellow]%}unpushed%{$reset_color%}%{$fg[yellow]%}]%{$reset_color%} "
   fi
 }
 
@@ -90,11 +90,11 @@ function git_time_since_commit() {
       fi
 
       if [ "$HOURS" -gt 24 ]; then
-        echo "$COLOR${DAYS}d${SUB_HOURS}h${SUB_MINUTES}m%{$reset_color%}"
+        echo "$COLOR${DAYS}d${SUB_HOURS}h${SUB_MINUTES}m%{$reset_color%} "
       elif [ "$MINUTES" -gt 60 ]; then
-        echo "$COLOR${HOURS}h${SUB_MINUTES}m%{$reset_color%}"
+        echo "$COLOR${HOURS}h${SUB_MINUTES}m%{$reset_color%} "
       else
-        echo "$COLOR${MINUTES}m%{$reset_color%}"
+        echo "$COLOR${MINUTES}m%{$reset_color%} "
       fi
     else
       COLOR="$TIME_SINCE_COMMIT_NEUTRAL"
