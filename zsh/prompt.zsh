@@ -90,11 +90,11 @@ function git_time_since_commit() {
       fi
 
       if [ "$HOURS" -gt 24 ]; then
-        echo "$COLOR${DAYS}d${SUB_HOURS}h${SUB_MINUTES}m%{$reset_color%} "
+        echo "$COLOR${DAYS}d${SUB_HOURS}h${SUB_MINUTES}m%{$reset_color%}"
       elif [ "$MINUTES" -gt 60 ]; then
-        echo "$COLOR${HOURS}h${SUB_MINUTES}m%{$reset_color%} "
+        echo "$COLOR${HOURS}h${SUB_MINUTES}m%{$reset_color%}"
       else
-        echo "$COLOR${MINUTES}m%{$reset_color%} "
+        echo "$COLOR${MINUTES}m%{$reset_color%}"
       fi
     else
       COLOR="$TIME_SINCE_COMMIT_NEUTRAL"
@@ -104,10 +104,10 @@ function git_time_since_commit() {
 }
 
 function prompt_char {
-	echo "%{$fg[red]%}%(!.#.»)%{$reset_color%}"
+	echo " %{$fg[red]%}%(!.#.»)%{$reset_color%} "
 }
 
-export PROMPT=$'$(directory_name)$(git_dirty)$(git_time_since_commit)$(prompt_char) '
+export PROMPT=$'$(directory_name)$(git_dirty)$(git_time_since_commit)$(prompt_char)'
 
 set_prompt () {
   export RPROMPT=$'%{$fg[cyan]%}%~%{$reset_color%}'
