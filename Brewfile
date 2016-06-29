@@ -18,7 +18,6 @@ brew 'roundup'
 brew 'unrar'
 brew 'wget'
 
-cask '1password'
 cask 'appcleaner'
 cask 'arduino'
 cask 'atom'
