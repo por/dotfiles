@@ -13,7 +13,7 @@ git_branch() {
 
 git_dirty() {
   GIT_PROMPT_PREFIX="%{$reset_color%}%{$fg[yellow]%}("
-  GIT_PROMPT_SUFFIX="%{$fg[yellow]%})%{$reset_color%} "
+  GIT_PROMPT_SUFFIX="%{$fg[yellow]%})%{$reset_color%}$(need_push) "
   GIT_PROMPT_CLEAN="%{$fg[green]%}*"
   GIT_PROMPT_DIRTY="%{$fg[red]%}*"
   GIT_PROMPT_UNTRACKED="%{$fg[cyan]%}*"
@@ -46,7 +46,7 @@ need_push () {
   then
     echo " "
   else
-    echo " with %{$fg_bold[magenta]%}unpushed%{$reset_color%} "
+    echo "%{$fg[yellow]%}[%{$reset_color%}%{$fg[yellow]%}unpushed%{$reset_color%}%{$fg[yellow]%}]%{$reset_color%}"
   fi
 }
 
@@ -107,7 +107,7 @@ function prompt_char {
 	echo "%{$fg[red]%}%(!.#.»)%{$reset_color%}"
 }
 
-export PROMPT=$'$(directory_name)$(git_dirty)$(git_time_since_commit)$(need_push)$(prompt_char) '
+export PROMPT=$'$(directory_name)$(git_dirty)$(git_time_since_commit)$(prompt_char) '
 
 set_prompt () {
   export RPROMPT=$'%{$fg[cyan]%}%~%{$reset_color%}'
