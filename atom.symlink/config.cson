@@ -10,6 +10,7 @@
     ignoredNames: [
       ".bundle"
       ".git"
+      ".DS_Store"
       "log"
       "repositories"
       "tmp"
