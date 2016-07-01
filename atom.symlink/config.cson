@@ -26,6 +26,8 @@
     showIndentGuide: true
     showInvisibles: true
     softWrapAtPreferredLineLength: true
+  "linter-stylelint":
+    disableWhenNoConfig: true
   "spell-check":
     grammars: [
       "text.plain"
