@@ -12,8 +12,8 @@ git_branch() {
 }
 
 git_dirty() {
-  GIT_PROMPT_PREFIX="%{$reset_color%}%{$fg[yellow]%}("
-  GIT_PROMPT_SUFFIX="%{$fg[yellow]%})%{$reset_color%}$(need_push)"
+  GIT_PROMPT_PREFIX=" %{$reset_color%}%{$fg[yellow]%}("
+  GIT_PROMPT_SUFFIX="%{$fg[yellow]%})%{$reset_color%} "
   GIT_PROMPT_CLEAN="%{$fg[green]%}*"
   GIT_PROMPT_DIRTY="%{$fg[red]%}*"
   GIT_PROMPT_UNTRACKED="%{$fg[cyan]%}*"
@@ -24,9 +24,9 @@ git_dirty() {
   else
     if [[ $($git status --porcelain) == "" ]]
     then
-      echo "$GIT_PROMPT_PREFIX$GIT_PROMPT_CLEAN$(git_prompt_info)$GIT_PROMPT_SUFFIX"
+      echo "$GIT_PROMPT_PREFIX$(git_prompt_info)$GIT_PROMPT_CLEAN$GIT_PROMPT_SUFFIX"
     else
-      echo "$GIT_PROMPT_PREFIX$GIT_PROMPT_DIRTY$(git_prompt_info)$GIT_PROMPT_SUFFIX"
+      echo "$GIT_PROMPT_PREFIX$(git_prompt_info)$GIT_PROMPT_DIRTY$GIT_PROMPT_SUFFIX"
     fi
   fi
 }
