@@ -15,6 +15,7 @@ brew 'postgresql'
 brew 'ruby-build'
 brew 'rbenv'
 brew 'roundup'
+brew 'tig'
 brew 'unrar'
 brew 'wget'
 
