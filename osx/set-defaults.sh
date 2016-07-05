@@ -23,7 +23,7 @@ defaults write com.apple.universalaccess closeViewZoomFollowsFocus -bool true
 defaults write -g ApplePressAndHoldEnabled -bool false
 
 # Save screenshots to the desktop
-defaults write com.apple.screencapture location -string "${HOME}/Desktop"
+defaults write com.apple.screencapture location -string "${HOME}"
 
 # Save screenshots in PNG format (other options: BMP, GIF, JPG, PDF, TIFF)
 defaults write com.apple.screencapture type -string "png"
