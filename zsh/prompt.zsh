@@ -121,7 +121,7 @@ function prompt_char {
 export PROMPT=$'$(directory_name)$(git_dirty)$(git_time_since_commit)$(prompt_char)'
 
 set_prompt () {
-  export RPROMPT=$'%F{cyan}%~%f$(check_last_exit_code)'
+  export RPROMPT=$'%F{blue}%~%f$(check_last_exit_code)'
 }
 
 precmd() {
