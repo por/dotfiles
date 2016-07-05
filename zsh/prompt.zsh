@@ -12,11 +12,11 @@ git_branch() {
 }
 
 git_dirty() {
-  GIT_PROMPT_PREFIX=" %{$reset_color%}%{$fg[yellow]%}("
-  GIT_PROMPT_SUFFIX="%{$fg[yellow]%})%{$reset_color%} "
-  GIT_PROMPT_CLEAN="%{$fg[green]%}*"
-  GIT_PROMPT_DIRTY="%{$fg[red]%}*"
-  GIT_PROMPT_UNTRACKED="%{$fg[cyan]%}*"
+  GIT_PROMPT_PREFIX=" %F{yellow}("
+  GIT_PROMPT_SUFFIX="%F{yellow})%f "
+  GIT_PROMPT_CLEAN="%F{green}*%f"
+  GIT_PROMPT_DIRTY="%F{red}*%f"
+  GIT_PROMPT_UNTRACKED="%F{cyan}*%f"
 
   if $(! $git status -s &> /dev/null)
   then
@@ -51,14 +51,14 @@ need_push () {
 }
 
 directory_name() {
-  echo "%{$fg[cyan]%}%n@%m %{$fg[green]%}%c%{$reset_color%}"
+  echo "%F{cyan}%n@%m%f %F{green}%c%f"
 }
 
 function git_time_since_commit() {
-  TIME_SINCE_COMMIT_SHORT="%{$fg[green]%}"
-  TIME_SHORT_COMMIT_MEDIUM="%{$fg[yellow]%}"
-  TIME_SINCE_COMMIT_LONG="%{$fg[red]%}"
-  TIME_SINCE_COMMIT_NEUTRAL="%{$fg[cyan]%}"
+  TIME_SINCE_COMMIT_SHORT="%F{green}"
+  TIME_SHORT_COMMIT_MEDIUM="%F{yellow}"
+  TIME_SINCE_COMMIT_LONG="%F{red}"
+  TIME_SINCE_COMMIT_NEUTRAL="%F{cyan}"
 
   if git rev-parse --git-dir > /dev/null 2>&1; then
     # Only proceed if there is actually a commit.
@@ -90,11 +90,11 @@ function git_time_since_commit() {
       fi
 
       if [ "$HOURS" -gt 24 ]; then
-        echo "$COLOR${DAYS}d${SUB_HOURS}h${SUB_MINUTES}m%{$reset_color%}"
+        echo "$COLOR${DAYS}d${SUB_HOURS}h${SUB_MINUTES}m%f"
       elif [ "$MINUTES" -gt 60 ]; then
-        echo "$COLOR${HOURS}h${SUB_MINUTES}m%{$reset_color%}"
+        echo "$COLOR${HOURS}h${SUB_MINUTES}m%f"
       else
-        echo "$COLOR${MINUTES}m%{$reset_color%}"
+        echo "$COLOR${MINUTES}m%f"
       fi
     else
       COLOR="$TIME_SINCE_COMMIT_NEUTRAL"
@@ -107,21 +107,21 @@ function check_last_exit_code() {
   local LAST_EXIT_CODE=$?
   if [[ $LAST_EXIT_CODE -ne 0 ]]; then
     local EXIT_CODE_PROMPT=' '
-    EXIT_CODE_PROMPT+="%{$fg[red]%}-%{$reset_color%}"
-    EXIT_CODE_PROMPT+="%{$fg_bold[red]%}$LAST_EXIT_CODE%{$reset_color%}"
-    EXIT_CODE_PROMPT+="%{$fg[red]%}-%{$reset_color%}"
+    EXIT_CODE_PROMPT+="%F{red}-%f"
+    EXIT_CODE_PROMPT+="%F{red}$LAST_EXIT_CODE%f"
+    EXIT_CODE_PROMPT+="%F{red}-%f"
     echo "$EXIT_CODE_PROMPT"
   fi
 }
 
 function prompt_char {
-  echo " %{$fg[red]%}%(!.#.»)%{$reset_color%} "
+  echo " %F{red}%(!.#.»)%f "
 }
 
 export PROMPT=$'$(directory_name)$(git_dirty)$(git_time_since_commit)$(prompt_char)'
 
 set_prompt () {
-  export RPROMPT=$'%{$fg[cyan]%}%~%{$reset_color%}$(check_last_exit_code)'
+  export RPROMPT=$'%F{cyan}%~%f$(check_last_exit_code)'
 }
 
 precmd() {
