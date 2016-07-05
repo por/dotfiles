@@ -18,8 +18,8 @@
       "node_modules"
     ]
     themes: [
-      "unity-ui"
-      "glacier-syntax"
+      "atom-dark-ui"
+      "oceanic-next"
     ]
   editor:
     fontFamily: "Menlo"

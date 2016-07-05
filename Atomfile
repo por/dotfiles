@@ -10,6 +10,7 @@ language-javascript-jsx
 linter
 linter-eslint
 linter-stylelint
+oceanic-next
 react
 toggle-quotes
 travis-ci-status
