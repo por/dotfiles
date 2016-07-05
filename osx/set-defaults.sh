@@ -23,7 +23,7 @@ defaults write com.apple.universalaccess closeViewZoomFollowsFocus -bool true
 defaults write -g ApplePressAndHoldEnabled -bool false
 
 # Save screenshots to the desktop
-defaults write com.apple.screencapture location -string "${HOME}"
+defaults write com.apple.screencapture location -string "${HOME}/Desktop"
 
 # Save screenshots in PNG format (other options: BMP, GIF, JPG, PDF, TIFF)
 defaults write com.apple.screencapture type -string "png"
@@ -34,7 +34,7 @@ defaults write com.apple.screencapture disable-shadow -bool true
 # Set Desktop as the default location for new Finder windows
 # For other paths, use `PfLo` and `file:///full/path/here/`
 defaults write com.apple.finder NewWindowTarget -string "PfDe"
-defaults write com.apple.finder NewWindowTargetPath -string "file://${HOME}/Desktop/"
+defaults write com.apple.finder NewWindowTargetPath -string "file://${HOME}/"
 
 # When performing a search, search the current folder by default
 defaults write com.apple.finder FXDefaultSearchScope -string "SCcf"
