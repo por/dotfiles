@@ -39,3 +39,6 @@ do
 done
 
 unset config_files
+
+# disable autocorrect
+unsetopt correct
