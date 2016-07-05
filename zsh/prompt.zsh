@@ -103,14 +103,25 @@ function git_time_since_commit() {
   fi
 }
 
+function check_last_exit_code() {
+  local LAST_EXIT_CODE=$?
+  if [[ $LAST_EXIT_CODE -ne 0 ]]; then
+    local EXIT_CODE_PROMPT=' '
+    EXIT_CODE_PROMPT+="%{$fg[red]%}-%{$reset_color%}"
+    EXIT_CODE_PROMPT+="%{$fg_bold[red]%}$LAST_EXIT_CODE%{$reset_color%}"
+    EXIT_CODE_PROMPT+="%{$fg[red]%}-%{$reset_color%}"
+    echo "$EXIT_CODE_PROMPT"
+  fi
+}
+
 function prompt_char {
-	echo " %{$fg[red]%}%(!.#.»)%{$reset_color%} "
+  echo " %{$fg[red]%}%(!.#.»)%{$reset_color%} "
 }
 
 export PROMPT=$'$(directory_name)$(git_dirty)$(git_time_since_commit)$(prompt_char)'
 
 set_prompt () {
-  export RPROMPT=$'%{$fg[cyan]%}%~%{$reset_color%}'
+  export RPROMPT=$'%{$fg[cyan]%}%~%{$reset_color%}$(check_last_exit_code)'
 }
 
 precmd() {
