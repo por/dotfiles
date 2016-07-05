@@ -51,7 +51,7 @@ need_push () {
 }
 
 directory_name() {
-  echo "%{$fg[cyan]%}%m %{$fg[green]%}%c%{$reset_color%}"
+  echo "%{$fg[cyan]%}%n@%m %{$fg[green]%}%c%{$reset_color%}"
 }
 
 function git_time_since_commit() {
