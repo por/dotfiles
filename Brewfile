@@ -5,6 +5,8 @@ tap 'caskroom/fonts'
 
 brew 'ack'
 brew 'coreutils'
+brew 'docker'
+brew 'docker-machine'
 brew 'go'
 brew 'grc'
 brew 'heroku-toolbelt'
