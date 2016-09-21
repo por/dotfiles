@@ -28,6 +28,8 @@
     showIndentGuide: true
     showInvisibles: true
     softWrapAtPreferredLineLength: true
+  linter:
+    lintOnFly: false
   "linter-stylelint":
     disableWhenNoConfig: true
   "spell-check":
