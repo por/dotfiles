@@ -25,6 +25,12 @@ Next thing we need to do is set `zsh` as the default shell:
 chsh -s /bin/zsh
 ```
 
+Import the Oceanic-Next iTerm color profile and select it in iTerm color preferences:
+
+```
+open ~/.dotfiles/iterm/Oceanic-Next.itermcolors
+```
+
 `dot` is a simple script that installs some dependencies, sets sane OS X
 defaults, and so on. Occasionally run `dot` from time to time to keep the environment fresh and up-to-date. This script lives in `bin/`.
 
