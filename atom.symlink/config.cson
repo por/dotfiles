@@ -4,6 +4,7 @@
       "background-tips"
       "exception-reporting"
       "metrics"
+      "vim-mode"
     ]
     followSymlinks: false
     hideGitIgnoredFiles: true
