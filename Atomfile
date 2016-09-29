@@ -8,10 +8,10 @@ language-docker
 language-haml
 language-htaccess
 language-javascript-jsx
+language-nginx
 linter
 linter-eslint
 linter-stylelint
-nginx-lang
 oceanic-next
 react
 sort-lines
