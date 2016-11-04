@@ -18,6 +18,7 @@
       "vendor"
       "node_modules"
     ]
+    telemetryConsent: "no"
     themes: [
       "atom-dark-ui"
       "oceanic-next"
