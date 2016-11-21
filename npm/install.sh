@@ -2,7 +2,7 @@
 #
 # Install global npm modules
 
-MODULES="create-react-app node-inspector serverless"
+MODULES="create-react-app serverless"
 
 for module in $MODULES; do
   echo "› npm install -g $module"
