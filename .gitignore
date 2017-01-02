@@ -7,4 +7,7 @@ atom.symlink/packages
 atom.symlink/storage
 atom.symlink/themes
 
+composer.symlink/cache
+composer.symlink/vendor
+
 git/gitconfig.local.symlink

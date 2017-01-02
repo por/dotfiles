@@ -1,0 +1,5 @@
+{
+    "require": {
+        "getkirby/cli": "^1.6"
+    }
+}
