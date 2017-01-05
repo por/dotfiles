@@ -30,6 +30,10 @@
     showIndentGuide: true
     showInvisibles: true
     softWrapAtPreferredLineLength: true
+  "git-plus":
+    general:
+      _analyticsUserId: "db468e6a-daa8-4d89-bd3c-0f0fbaaa0c17"
+      analytics: false
   linter:
     lintOnFly: false
   "linter-stylelint":
