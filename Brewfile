@@ -27,6 +27,7 @@ brew 'unrar'
 brew 'wget'
 
 cask '1password'
+cask 'aerial'
 cask 'appcleaner'
 cask 'arduino'
 cask 'atom'
