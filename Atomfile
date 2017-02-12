@@ -4,6 +4,7 @@ blame
 docblockr
 file-type-icons
 git-plus
+language-babel
 language-cypher
 language-docker
 language-haml
@@ -14,7 +15,6 @@ linter
 linter-eslint
 linter-stylelint
 oceanic-next
-react
 sort-lines
 svgo
 toggle-quotes
