@@ -34,9 +34,13 @@
       _analyticsUserId: "db468e6a-daa8-4d89-bd3c-0f0fbaaa0c17"
       analytics: false
   linter:
+    lintOnChange: false
     lintOnFly: false
+    lintPreviewTabs: false
   "linter-stylelint":
     disableWhenNoConfig: true
+  "linter-ui-default":
+    showPanel: true
   "spell-check":
     grammars: [
       "text.plain"
