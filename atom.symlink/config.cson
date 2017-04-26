@@ -48,5 +48,6 @@
       "text.git-commit"
       "text.html.basic"
     ]
+  "tree-view": {}
   welcome:
     showOnStartup: false
