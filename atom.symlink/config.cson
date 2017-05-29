@@ -24,7 +24,6 @@
     ]
   editor:
     fontFamily: "Menlo"
-    fontSize: 12
     invisibles: {}
     showIndentGuide: true
     showInvisibles: true
@@ -35,7 +34,6 @@
       analytics: false
   linter:
     lintOnChange: false
-    lintOnFly: false
     lintPreviewTabs: false
   "linter-stylelint":
     disableWhenNoConfig: true
