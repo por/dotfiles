@@ -37,8 +37,7 @@
     lintPreviewTabs: false
   "linter-stylelint":
     disableWhenNoConfig: true
-  "linter-ui-default":
-    showPanel: true
+  "linter-ui-default": {}
   "spell-check":
     grammars: [
       "text.plain"
