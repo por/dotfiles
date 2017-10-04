@@ -2,7 +2,7 @@
 #
 # Install global npm modules
 
-MODULES="create-react-app serverless"
+MODULES="react-native-cli"
 
 for module in $MODULES; do
   echo "› npm install -g $module"
