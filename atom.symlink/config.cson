@@ -1,5 +1,21 @@
 "*":
+  "autocomplete-paths": {}
   core:
+    automaticallyUpdate: false
+    disabledPackages: [
+      "prettier-atom"
+    ]
+    ignoredNames: [
+      ".git"
+      ".hg"
+      ".svn"
+      ".DS_Store"
+      "._*"
+      "Thumbs.db"
+      "desktop.ini"
+      "node_modules"
+      "vendor"
+    ]
     telemetryConsent: "no"
   editor:
     showCursorOnSelection: false
@@ -20,7 +36,9 @@
     disableWhenNoConfig: true
   "linter-ui-default":
     panelHeight: 69
-    showPanel: true
+  "prettier-atom":
+    formatOnSaveOptions:
+      showInStatusBar: true
   "spell-check":
     grammars: [
       "text.plain"
@@ -35,6 +53,7 @@
   editor:
     commentEnd: " --}}"
     commentStart: "{{-- "
+    tabLength: 4
 ".html.php.text":
   editor:
     tabLength: 4
