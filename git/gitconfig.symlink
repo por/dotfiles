@@ -14,6 +14,7 @@
   wtf     = !$ZSH/bin/git-wtf
   rank-contributors = !$ZSH/bin/git-rank-contributors
   count   = !git shortlog -sn
+  deptprofile = config user.name \"Tim Bormans\" user.email \"tim.bormans@deptagency.com\"
 [color]
   [color "diff"]
     meta = yellow bold
@@ -42,11 +43,3 @@
   autocorrect = 1
 [push]
   default = current
-[http "https://git.flynn.martim.nl"]
-	sslCAInfo = /Users/tim/.flynn/ca-certs/default.pem
-[credential "https://git.flynn.martim.nl"]
-	helper = /usr/local/bin/flynn git-credentials
-[http "https://git.iguanodon.timbormans.com"]
-	sslCAInfo = /Users/tim/.flynn/ca-certs/iguanodon.pem
-[credential "https://git.iguanodon.timbormans.com"]
-	helper = /usr/local/bin/flynn git-credentials
