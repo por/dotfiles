@@ -2,31 +2,31 @@
   "entries": {
     "tap": {
       "caskroom/fonts": {
-        "revision": "1407d48a88309eb141dd1900d81398e18ed95ee8"
+        "revision": "a624c89faf91b3ee1d4743d705ccff4e624ec181"
       }
     },
     "brew": {
       "ack": {
-        "version": "3.2.0",
+        "version": "3.3.1",
         "bottle": false
       },
       "coreutils": {
-        "version": "8.31",
+        "version": "8.32",
         "bottle": {
           "cellar": "/usr/local/Cellar",
           "prefix": "/usr/local",
           "files": {
             "catalina": {
-              "url": "https://homebrew.bintray.com/bottles/coreutils-8.31.catalina.bottle.1.tar.gz",
-              "sha256": "7262e4c76483ea796454db828c25955be1e6b2bc8e056ba1dd6e92bfe1118da5"
+              "url": "https://homebrew.bintray.com/bottles/coreutils-8.32.catalina.bottle.tar.gz",
+              "sha256": "67a4452d75a1882bd7fb977b384204edfa2758276d66290e595487922368e093"
             },
             "mojave": {
-              "url": "https://homebrew.bintray.com/bottles/coreutils-8.31.mojave.bottle.1.tar.gz",
-              "sha256": "05ae58c26a53c2dfa2d9d45943b9d21753eea59609f0a48caa59713d6f6392d7"
+              "url": "https://homebrew.bintray.com/bottles/coreutils-8.32.mojave.bottle.tar.gz",
+              "sha256": "5da6cb9dbc0a8144480dde2fb78eb0a5a1710490afc3697174f7e261ec69763f"
             },
             "high_sierra": {
-              "url": "https://homebrew.bintray.com/bottles/coreutils-8.31.high_sierra.bottle.1.tar.gz",
-              "sha256": "5cba7394f1995fad0f6215a7618f65983dcf84b93b076af18d09354051320fb2"
+              "url": "https://homebrew.bintray.com/bottles/coreutils-8.32.high_sierra.bottle.tar.gz",
+              "sha256": "caa8cd8965727d0e805eccdc3e306cd0599720cdd0d5417cfcca03bead670663"
             }
           }
         }
@@ -36,22 +36,22 @@
         "bottle": false
       },
       "libgit2": {
-        "version": "0.28.4",
+        "version": "1.0.0",
         "bottle": {
           "cellar": ":any",
           "prefix": "/usr/local",
           "files": {
             "catalina": {
-              "url": "https://homebrew.bintray.com/bottles/libgit2-0.28.4.catalina.bottle.tar.gz",
-              "sha256": "87e6974b3a960f25b05f03f3e5d8e4cdbb280d637c98a9125d70f697e7668284"
+              "url": "https://homebrew.bintray.com/bottles/libgit2-1.0.0.catalina.bottle.tar.gz",
+              "sha256": "d9468719e8d981a91efea6ad25f83dd0d72300aef3f99c593844fbf440596de9"
             },
             "mojave": {
-              "url": "https://homebrew.bintray.com/bottles/libgit2-0.28.4.mojave.bottle.tar.gz",
-              "sha256": "50a790265b670987229ef99b4519926631f2faf6350f65fb0eaa8f19a8b40643"
+              "url": "https://homebrew.bintray.com/bottles/libgit2-1.0.0.mojave.bottle.tar.gz",
+              "sha256": "aa852c2192e21ccff73cee2b8819c5362083746e5cfbba06b6c38e3a5102b818"
             },
             "high_sierra": {
-              "url": "https://homebrew.bintray.com/bottles/libgit2-0.28.4.high_sierra.bottle.tar.gz",
-              "sha256": "709376382fec08680fae85ba1751ad8a2beb677a1cd24653636a242a3a228056"
+              "url": "https://homebrew.bintray.com/bottles/libgit2-1.0.0.high_sierra.bottle.tar.gz",
+              "sha256": "7f8ba85e6a7eff267eb1e750a85fc5d440858329ea9e2d674ec8900dd82ba3be"
             }
           }
         }
@@ -61,26 +61,22 @@
         "bottle": null
       },
       "readline": {
-        "version": "8.0.1",
+        "version": "8.0.4",
         "bottle": {
           "cellar": ":any",
           "prefix": "/usr/local",
           "files": {
             "catalina": {
-              "url": "https://homebrew.bintray.com/bottles/readline-8.0.1.catalina.bottle.tar.gz",
-              "sha256": "ab3c966f4cae7d0f3ecc5688bb989820c3261f5ed547a08c84186ba7f53bdd9c"
+              "url": "https://homebrew.bintray.com/bottles/readline-8.0.4.catalina.bottle.tar.gz",
+              "sha256": "6ae1c8e7c783f32bd22c6085caa4d838fed7fb386da7e40ca47b87ec9b1237d6"
             },
             "mojave": {
-              "url": "https://homebrew.bintray.com/bottles/readline-8.0.1.mojave.bottle.tar.gz",
-              "sha256": "3c754391e9d243835811d128771ca0f1a565024100fd2c2871534353d46aaf0e"
+              "url": "https://homebrew.bintray.com/bottles/readline-8.0.4.mojave.bottle.tar.gz",
+              "sha256": "29f7102a730ab39c8312cad1e7e439f6da2a67c452ce2b3380581eb185a5d8e8"
             },
             "high_sierra": {
-              "url": "https://homebrew.bintray.com/bottles/readline-8.0.1.high_sierra.bottle.tar.gz",
-              "sha256": "ae341a036139a92a47396aabc773ffcf40a17fc388aaadf0147f688c72ece987"
-            },
-            "sierra": {
-              "url": "https://homebrew.bintray.com/bottles/readline-8.0.1.sierra.bottle.tar.gz",
-              "sha256": "f234d1ff8148bf08b0ac31e661f2e96b5c6e64df26a45d2392056c9077f964af"
+              "url": "https://homebrew.bintray.com/bottles/readline-8.0.4.high_sierra.bottle.tar.gz",
+              "sha256": "896a3d50ce8962ba56e853bdd590fadeabc00ab36475d143d6c2bea5cc15bb28"
             }
           }
         }
@@ -148,22 +144,22 @@
         }
       },
       "unrar": {
-        "version": "5.8.5",
+        "version": "5.9.2",
         "bottle": {
           "cellar": ":any",
           "prefix": "/usr/local",
           "files": {
             "catalina": {
-              "url": "https://homebrew.bintray.com/bottles/unrar-5.8.5.catalina.bottle.tar.gz",
-              "sha256": "555a39a080ba65da9f8d4a5c02fc95eb810221f9e88dfb741261ce32622e7a00"
+              "url": "https://homebrew.bintray.com/bottles/unrar-5.9.2.catalina.bottle.tar.gz",
+              "sha256": "d419ab2c23760fd3d53c9d64bbcdcf0302a38f24cd3e7fd3f87825b4b19feeda"
             },
             "mojave": {
-              "url": "https://homebrew.bintray.com/bottles/unrar-5.8.5.mojave.bottle.tar.gz",
-              "sha256": "c2011afe36f228c13123bbe3c4a777439f353c5b183313160f0118b79d3af417"
+              "url": "https://homebrew.bintray.com/bottles/unrar-5.9.2.mojave.bottle.tar.gz",
+              "sha256": "d537112798eac8eca1f7f2f1fd14371c0930ab0d5c4aa9fe5d7e5017be94c01d"
             },
             "high_sierra": {
-              "url": "https://homebrew.bintray.com/bottles/unrar-5.8.5.high_sierra.bottle.tar.gz",
-              "sha256": "cb838a0e04135acb5b7bd0e92f7a73371208c407c8abeaf0c42b60ae367b609d"
+              "url": "https://homebrew.bintray.com/bottles/unrar-5.9.2.high_sierra.bottle.tar.gz",
+              "sha256": "fc090e0967acbe5d14b62f1ae5b40520e335f4402d7c99ce7034153df5313ff4"
             }
           }
         }
@@ -190,11 +186,11 @@
         }
       },
       "nvm": {
-        "version": "0.35.2",
+        "version": "0.35.3",
         "bottle": false
       },
       "yarn": {
-        "version": "1.21.1",
+        "version": "1.22.4",
         "bottle": false
       }
     },
@@ -202,6 +198,7 @@
       "1password": {
         "version": "7.3.2",
         "options": {
+          "full_name": "1password",
           "args": {
             "appdir": "/Applications"
           }
@@ -210,6 +207,7 @@
       "appcleaner": {
         "version": "3.5",
         "options": {
+          "full_name": "appcleaner",
           "args": {
             "appdir": "/Applications"
           }
@@ -218,14 +216,16 @@
       "brave-browser": {
         "version": "0.68.132",
         "options": {
+          "full_name": "brave-browser",
           "args": {
             "appdir": "/Applications"
           }
         }
       },
       "charles": {
-        "version": "4.5.5",
+        "version": "4.5.6",
         "options": {
+          "full_name": "charles",
           "args": {
             "appdir": "/Applications"
           }
@@ -234,6 +234,7 @@
       "docker": {
         "version": "2.1.0.2,37877",
         "options": {
+          "full_name": "docker",
           "args": {
             "appdir": "/Applications"
           }
@@ -242,6 +243,7 @@
       "firefox": {
         "version": "69.0",
         "options": {
+          "full_name": "firefox",
           "args": {
             "appdir": "/Applications"
           }
@@ -250,6 +252,7 @@
       "font-alegreya-sans": {
         "version": "2.008",
         "options": {
+          "full_name": "font-alegreya-sans",
           "args": {
             "appdir": "/Applications"
           }
@@ -258,6 +261,7 @@
       "font-alegreya": {
         "version": "2.008",
         "options": {
+          "full_name": "font-alegreya",
           "args": {
             "appdir": "/Applications"
           }
@@ -266,6 +270,7 @@
       "font-anonymous-pro": {
         "version": "1.002",
         "options": {
+          "full_name": "font-anonymous-pro",
           "args": {
             "appdir": "/Applications"
           }
@@ -274,6 +279,7 @@
       "font-cardo": {
         "version": "1.04",
         "options": {
+          "full_name": "font-cardo",
           "args": {
             "appdir": "/Applications"
           }
@@ -282,6 +288,7 @@
       "font-fira-sans": {
         "version": "4.202",
         "options": {
+          "full_name": "font-fira-sans",
           "args": {
             "appdir": "/Applications"
           }
@@ -290,6 +297,7 @@
       "font-inconsolata": {
         "version": "latest",
         "options": {
+          "full_name": "font-inconsolata",
           "args": {
             "appdir": "/Applications"
           }
@@ -298,6 +306,7 @@
       "font-karla": {
         "version": "latest",
         "options": {
+          "full_name": "font-karla",
           "args": {
             "appdir": "/Applications"
           }
@@ -306,6 +315,7 @@
       "font-lato": {
         "version": "latest",
         "options": {
+          "full_name": "font-lato",
           "args": {
             "appdir": "/Applications"
           }
@@ -314,6 +324,7 @@
       "font-libre-baskerville": {
         "version": "latest",
         "options": {
+          "full_name": "font-libre-baskerville",
           "args": {
             "appdir": "/Applications"
           }
@@ -322,6 +333,7 @@
       "font-merriweather": {
         "version": "latest",
         "options": {
+          "full_name": "font-merriweather",
           "args": {
             "appdir": "/Applications"
           }
@@ -330,6 +342,7 @@
       "font-montserrat": {
         "version": "7.200",
         "options": {
+          "full_name": "font-montserrat",
           "args": {
             "appdir": "/Applications"
           }
@@ -338,6 +351,7 @@
       "font-neuton": {
         "version": "latest",
         "options": {
+          "full_name": "font-neuton",
           "args": {
             "appdir": "/Applications"
           }
@@ -346,6 +360,7 @@
       "font-open-sans": {
         "version": "latest",
         "options": {
+          "full_name": "font-open-sans",
           "args": {
             "appdir": "/Applications"
           }
@@ -354,6 +369,7 @@
       "font-poppins": {
         "version": "3.200",
         "options": {
+          "full_name": "font-poppins",
           "args": {
             "appdir": "/Applications"
           }
@@ -362,6 +378,7 @@
       "font-roboto": {
         "version": "latest",
         "options": {
+          "full_name": "font-roboto",
           "args": {
             "appdir": "/Applications"
           }
@@ -370,6 +387,7 @@
       "font-source-sans-pro": {
         "version": "2.045R-ro-1.095R-it",
         "options": {
+          "full_name": "font-source-sans-pro",
           "args": {
             "appdir": "/Applications"
           }
@@ -378,14 +396,16 @@
       "font-source-serif-pro": {
         "version": "3.000R",
         "options": {
+          "full_name": "font-source-serif-pro",
           "args": {
             "appdir": "/Applications"
           }
         }
       },
       "font-work-sans": {
-        "version": "1.6",
+        "version": "latest",
         "options": {
+          "full_name": "font-work-sans",
           "args": {
             "appdir": "/Applications"
           }
@@ -394,6 +414,7 @@
       "google-chrome": {
         "version": "77.0.3865.75",
         "options": {
+          "full_name": "google-chrome",
           "args": {
             "appdir": "/Applications"
           }
@@ -402,6 +423,7 @@
       "imageoptim": {
         "version": "1.8.8",
         "options": {
+          "full_name": "imageoptim",
           "args": {
             "appdir": "/Applications"
           }
@@ -410,6 +432,7 @@
       "iterm2": {
         "version": "3.3.3",
         "options": {
+          "full_name": "iterm2",
           "args": {
             "appdir": "/Applications"
           }
@@ -418,6 +441,7 @@
       "postman": {
         "version": "7.6.0",
         "options": {
+          "full_name": "postman",
           "args": {
             "appdir": "/Applications"
           }
@@ -426,6 +450,7 @@
       "sketch": {
         "version": "57.1-83088",
         "options": {
+          "full_name": "sketch",
           "args": {
             "appdir": "/Applications"
           }
@@ -434,6 +459,7 @@
       "skype": {
         "version": "8.51.0.92",
         "options": {
+          "full_name": "skype",
           "args": {
             "appdir": "/Applications"
           }
@@ -442,6 +468,7 @@
       "slack": {
         "version": "4.0.3",
         "options": {
+          "full_name": "slack",
           "args": {
             "appdir": "/Applications"
           }
@@ -450,6 +477,7 @@
       "spectacle": {
         "version": "1.2",
         "options": {
+          "full_name": "spectacle",
           "args": {
             "appdir": "/Applications"
           }
@@ -458,14 +486,16 @@
       "spotify": {
         "version": "latest",
         "options": {
+          "full_name": "spotify",
           "args": {
             "appdir": "/Applications"
           }
         }
       },
       "toggl": {
-        "version": "7.4.1092",
+        "version": "7.5.85",
         "options": {
+          "full_name": "toggl",
           "args": {
             "appdir": "/Applications"
           }
@@ -474,6 +504,7 @@
       "visual-studio-code": {
         "version": "1.38.0",
         "options": {
+          "full_name": "visual-studio-code",
           "args": {
             "appdir": "/Applications"
           }
@@ -482,6 +513,7 @@
       "vlc": {
         "version": "3.0.8",
         "options": {
+          "full_name": "vlc",
           "args": {
             "appdir": "/Applications"
           }
@@ -498,6 +530,14 @@
         "CLT": "10.3.0.0.1.1562985497",
         "Xcode": "11.0",
         "macOS": "10.14.6"
+      },
+      "catalina": {
+        "HOMEBREW_VERSION": "2.2.14",
+        "HOMEBREW_PREFIX": "/usr/local",
+        "Homebrew/homebrew-core": "c2545a665653fd277a2b7efb36d01ca750c87fb9",
+        "CLT": "",
+        "Xcode": "11.4.1",
+        "macOS": "10.15.3"
       }
     }
   }
