@@ -434,15 +434,6 @@
           }
         }
       },
-      "capture-one": {
-        "version": "12.1.4",
-        "options": {
-          "full_name": "capture-one",
-          "args": {
-            "appdir": "/Applications"
-          }
-        }
-      },
       "docker": {
         "version": "4.15.0,93002",
         "options": {
