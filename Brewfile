@@ -2,6 +2,8 @@ cask_args appdir: '/Applications'
 
 # Driver casks needed for e.g. Sonos
 tap 'homebrew/cask-drivers'
+# Older app versions needed for e.g. 1password7
+tap 'homebrew/cask-versions'
 
 # Utils
 brew 'coreutils'
@@ -16,7 +18,6 @@ brew 'yarn'
 brew 'youtube-dlc'
 
 # Apps
-cask '1password'
 cask 'airflow'
 cask 'brave-browser'
 cask 'calibre'
@@ -28,6 +29,7 @@ cask 'imageoptim'
 cask 'iterm2'
 cask 'ngrok'
 cask 'notion'
+cask 'raycast'
 cask 'signal'
 cask 'sketch'
 cask 'slack'
@@ -42,3 +44,6 @@ cask 'zoom'
 
 # Drivers
 cask 'sonos'
+
+# Old app versions
+cask '1password7'
