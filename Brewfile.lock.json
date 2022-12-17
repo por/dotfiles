@@ -1,5 +1,10 @@
 {
   "entries": {
+    "tap": {
+      "homebrew/cask-drivers": {
+        "revision": "082a40cc3990b93fb8426e2166f8abb1ab3b828a"
+      }
+    },
     "brew": {
       "coreutils": {
         "version": "9.1",
@@ -537,15 +542,6 @@
           }
         }
       },
-      "sonos": {
-        "version": "14.20,70.4.35282",
-        "options": {
-          "full_name": "sonos",
-          "args": {
-            "appdir": "/Applications"
-          }
-        }
-      },
       "spotify": {
         "version": "1.2.0.1165,abf054ab,1083",
         "options": {
@@ -617,6 +613,15 @@
             "appdir": "/Applications"
           }
         }
+      },
+      "sonos": {
+        "version": "14.20,70.4.35282",
+        "options": {
+          "full_name": "sonos",
+          "args": {
+            "appdir": "/Applications"
+          }
+        }
       }
     }
   },
@@ -625,7 +630,7 @@
       "monterey": {
         "HOMEBREW_VERSION": "3.6.15",
         "HOMEBREW_PREFIX": "/usr/local",
-        "Homebrew/homebrew-core": "0a699bcfb53f8368f043b57eeb1fa90b81f5c63d",
+        "Homebrew/homebrew-core": "7e3b1f744bb491ac89e4fc99605a1915a0d82e15",
         "CLT": "14.0.0.0.1.1661618636",
         "Xcode": "14.2",
         "macOS": "12.6"
