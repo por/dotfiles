@@ -10,11 +10,7 @@
   pu = push
   lg = log --graph --pretty=format':%C(yellow)%h%Cblue%d%Creset %s %C(white) %an, %ar%Creset'
   df = diff --word-diff
-  promote = !$ZSH/bin/git-promote
-  wtf     = !$ZSH/bin/git-wtf
-  rank-contributors = !$ZSH/bin/git-rank-contributors
-  count   = !git shortlog -sn
-  deptprofile = config user.name \"Tim Bormans\" user.email \"tim.bormans@deptagency.com\"
+  count = !git shortlog -sn
 [color]
   [color "diff"]
     meta = yellow bold
@@ -44,4 +40,4 @@
 [push]
   default = current
 [pull]
-	ff = only
+  ff = only
