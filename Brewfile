@@ -19,6 +19,7 @@ brew 'youtube-dlc'
 
 # Apps
 cask 'airflow'
+cask 'around'
 cask 'brave-browser'
 cask 'calibre'
 cask 'docker'
