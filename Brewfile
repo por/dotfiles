@@ -6,6 +6,7 @@ tap 'homebrew/cask-drivers'
 tap 'homebrew/cask-versions'
 
 # Utils
+brew 'act'
 brew 'coreutils'
 brew 'curl'
 brew 'ffmpeg'
