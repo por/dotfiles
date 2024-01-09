@@ -42,3 +42,5 @@ unset config_files
 
 # disable autocorrect
 unsetopt correct
+
+source /Users/tim/.docker/init-zsh.sh || true # Added by Docker Desktop
