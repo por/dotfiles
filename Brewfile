@@ -10,7 +10,6 @@ brew 'fzf'                # Command-line fuzzy finder written in Go
 brew 'gh'                 # GitHub command-line tool
 brew 'jq'                 # Lightweight and flexible command-line JSON processor
 brew 'mise'               # Polyglot runtime manager (asdf rust clone)
-brew 'starship'           # Cross-shell prompt for astronauts
 brew 'yt-dlp'             # Feature-rich command-line audio/video downloader
 
 # Apps
