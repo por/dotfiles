@@ -51,7 +51,11 @@ need_push () {
 }
 
 directory_name() {
-  echo "%F{cyan}%n@%m%f %F{green}%c%f"
+  if [[ -n $SSH_CONNECTION ]] || [[ -n $SSH_CLIENT ]]; then
+    echo "%F{cyan}%n@%m%f %F{green}%c%f"
+  else
+    echo "%F{cyan}%n%f %F{green}%c%f"
+  fi
 }
 
 function git_time_since_commit() {
