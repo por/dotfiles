@@ -28,7 +28,10 @@
   ui = auto
 [core]
   excludesfile = ~/.gitignore
+  attributesfile = ~/.gitattributes
   editor = vim
+  untrackedCache = true
+  fsmonitor = true
 [apply]
   whitespace = nowarn
 [mergetool]
@@ -42,4 +45,25 @@
 [pull]
   ff = only
 [init]
-	defaultBranch = main
+  defaultBranch = main
+[fetch]
+  prune = true
+  tags = true
+[rebase]
+  autoStash = true
+[rerere]
+  enabled = true
+[diff]
+  algorithm = histogram
+  renames = copies
+[merge]
+  log = true
+  conflictstyle = zdiff3
+[commit]
+  verbose = true
+[status]
+  showUntrackedFiles = all
+[transfer]
+  fsckObjects = true
+[log]
+  abbrevCommit = true
