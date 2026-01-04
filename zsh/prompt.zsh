@@ -1,10 +1,20 @@
 autoload colors && colors
 
+# Locate git executable for prompt functions below.
+# Fallback needed because git location varies by architecture when not in PATH.
 if (( $+commands[git] ))
 then
   git="$commands[git]"
 else
-  git="/usr/bin/git"
+  # Check architecture-specific locations:
+  # ARM64: /opt/homebrew/bin/git, Intel: /usr/local/bin/git, System: /usr/bin/git
+  for gitpath in /opt/homebrew/bin/git /usr/local/bin/git /usr/bin/git; do
+    if [[ -x "$gitpath" ]]; then
+      git="$gitpath"
+      break
+    fi
+  done
+  git="${git:-git}"
 fi
 
 git_branch() {
