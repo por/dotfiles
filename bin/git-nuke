@@ -8,5 +8,10 @@
 #
 #   git nuke add-git-nuke
 
-git branch -D $1
-git push origin :$1
+if [ -z "$1" ]; then
+  echo "Error: Branch name required"
+  echo "Usage: git nuke <branch-name>"
+  exit 1
+fi
+
+git branch -D "$1" && git push origin ":$1"
