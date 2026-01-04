@@ -1,0 +1,7 @@
+#!/bin/sh
+#
+# Copy the current branch name to the clipboard
+
+branch=$(git rev-parse --abbrev-ref HEAD)
+echo "$branch" | tr -d '\n' | pbcopy
+echo "Copied branch name to clipboard: $branch"
