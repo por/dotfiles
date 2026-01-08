@@ -18,6 +18,7 @@ cask 'brave-browser'      # Web browser focusing on privacy
 cask 'bruno'              # Open source IDE for exploring and testing APIs
 cask 'calibre'            # E-books management software
 cask 'claude'             # Anthropic's official Claude AI desktop app
+cask 'claude-code'        # Terminal-based AI coding assistant
 cask 'figma'              # Collaborative team software
 cask 'firefox'            # Web browser
 cask 'google-chrome'      # Web browser
