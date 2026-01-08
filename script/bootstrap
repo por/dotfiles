@@ -166,6 +166,23 @@ then
   else
     fail "error installing dependencies"
   fi
+
+  user ' - Do you want to set macOS defaults (keyboard, trackpad)? (y/n)'
+  read -n 1 action
+  echo ''
+
+  if [ "$action" = "y" ] || [ "$action" = "Y" ]
+  then
+    info "setting macOS defaults"
+    if bash "$DOTFILES_ROOT/macos/set-defaults.sh"
+    then
+      success "macOS defaults set"
+    else
+      fail "error setting macOS defaults"
+    fi
+  else
+    success "skipped macOS defaults"
+  fi
 fi
 
 echo ''

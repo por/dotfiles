@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#
+# set-defaults
+#
+# Sets macOS system defaults by running $HOME/.dotfiles/macos/set-defaults.sh
+
+if [ "$(uname -s)" != "Darwin" ]; then
+  echo "This command only runs on macOS"
+  exit 0
+fi
+
+exec "$HOME/.dotfiles/macos/set-defaults.sh"
