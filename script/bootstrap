@@ -143,6 +143,22 @@ install_dotfiles
 # If we're on a Mac, let's install and setup homebrew.
 if [ "$(uname -s)" == "Darwin" ]
 then
+  # Check if Homebrew is installed, install it if not
+  if ! command -v brew >/dev/null 2>&1
+  then
+    info "installing Homebrew"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+    # Add Homebrew to PATH for Apple Silicon Macs
+    if [ -f /opt/homebrew/bin/brew ]; then
+      eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [ -f /usr/local/bin/brew ]; then
+      eval "$(/usr/local/bin/brew shellenv)"
+    fi
+
+    success "Homebrew installed"
+  fi
+
   info "installing dependencies"
   if source bin/dot | while read -r data; do info "$data"; done
   then
