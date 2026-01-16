@@ -37,6 +37,10 @@ defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 # Trackpad: Enable tap to click for built-in trackpad
 defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true
 
+# Zoom: Enable scroll gesture with modifier keys to zoom
+echo "› Enabling zoom with scroll gesture and modifier keys"
+defaults write com.apple.universalaccess closeViewScrollWheelToggle -bool true
+
 echo ""
 echo "✓ macOS defaults set successfully"
 echo ""
@@ -49,4 +53,5 @@ echo "After restarting, verify settings in:"
 echo "  • System Settings > Keyboard > Key repeat rate (should be fastest)"
 echo "  • System Settings > Keyboard > Delay until repeat (should be shortest)"
 echo "  • System Settings > Trackpad > Tap to click (should be ON)"
+echo "  • System Settings > Accessibility > Zoom > Use scroll gesture with modifier keys to zoom (should be ON)"
 echo ""
