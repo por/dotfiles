@@ -4,6 +4,7 @@ cask_args appdir: '/Applications'
 brew 'act'                # Run your GitHub Actions locally
 brew 'cloudflared'        # Cloudflare Tunnel client
 brew 'coreutils'          # GNU File, Shell, and Text utilities
+brew 'create-dmg'         # Shell script to build fancy DMGs
 brew 'curl'               # Get a file from an HTTP, HTTPS or FTP server
 brew 'ffmpeg'             # Play, record, convert, and stream audio and video
 brew 'fzf'                # Command-line fuzzy finder written in Go
@@ -29,6 +30,7 @@ cask 'mullvad-vpn'        # VPN client
 cask 'netnewswire'        # Free and open-source RSS reader
 cask 'orbstack'           # Replacement for Docker Desktop
 cask 'raycast'            # Control your tools with a few keystrokes
+cask 'sf-symbols'         # Tool that provides consistent, highly configurable symbols for apps
 cask 'signal'             # Instant messaging application focusing on security
 cask 'slack'              # Team communication and collaboration software
 cask 'tableplus'          # Native GUI tool for relational databases
