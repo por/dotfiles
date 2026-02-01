@@ -6,7 +6,7 @@ SKILLS_SRC="$HOME/.dotfiles/agents/skills"
 SKILLS_DST="$HOME/.claude/skills"
 DEFAULT_FILE="$HOME/.dotfiles/agents/skills.default"
 
-mkdir -p "$SKILLS_DST"
+mkdir -p "$SKILLS_DST" || { echo "Error: Cannot create $SKILLS_DST" >&2; exit 1; }
 
 is_enabled() {
     [ -L "$SKILLS_DST/$1" ]
@@ -102,6 +102,10 @@ case "$1" in
             echo "Usage: skills disable <skill>"
             exit 1
         fi
+        if [ ! -d "$SKILLS_SRC/$2" ]; then
+            echo "Error: Skill '$2' not found in $SKILLS_SRC"
+            exit 1
+        fi
         if is_enabled "$2"; then
             disable_skill "$2"
             echo "Disabled: $2"
@@ -129,9 +133,9 @@ case "$1" in
 
         echo "Bootstrapping skills from skills.default..."
         while IFS= read -r skill || [ -n "$skill" ]; do
+            skill=$(echo "$skill" | xargs)  # trim whitespace first
             # Skip comments and empty lines
             [[ "$skill" =~ ^#.*$ || -z "$skill" ]] && continue
-            skill=$(echo "$skill" | xargs)  # trim whitespace
             if enable_skill "$skill"; then
                 echo "  Enabled: $skill"
             fi
