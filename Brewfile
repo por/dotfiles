@@ -9,6 +9,7 @@ brew 'curl'               # Get a file from an HTTP, HTTPS or FTP server
 brew 'ffmpeg'             # Play, record, convert, and stream audio and video
 brew 'fzf'                # Command-line fuzzy finder written in Go
 brew 'gh'                 # GitHub command-line tool
+brew 'gum'                # Tool for glamorous shell scripts
 brew 'jq'                 # Lightweight and flexible command-line JSON processor
 brew 'mise'               # Polyglot runtime manager (asdf rust clone)
 brew 'yt-dlp'             # Feature-rich command-line audio/video downloader

@@ -26,91 +26,79 @@ disable_skill() {
 }
 
 interactive_mode() {
-    if ! command -v fzf &> /dev/null; then
-        echo "fzf not found. Install it or use: skills list|enable|disable"
+    if ! command -v gum &> /dev/null; then
+        echo "gum not found. Install it with: brew install gum"
         exit 1
     fi
 
-    # Build list of skills with current state
-    skills_list=""
+    # Build arrays of all skills and currently enabled skills
+    local skills=()
+    local selected_args=()
+
     for d in "$SKILLS_SRC"/*/; do
         [ -d "$d" ] || continue
         name=$(basename "$d")
+        skills+=("$name")
         if is_enabled "$name"; then
-            skills_list+="[x] $name"$'\n'
-        else
-            skills_list+="[ ] $name"$'\n'
+            selected_args+=("--selected" "$name")
         fi
     done
 
-    # Remove trailing newline
-    skills_list="${skills_list%$'\n'}"
+    if [ ${#skills[@]} -eq 0 ]; then
+        echo "No skills found in $SKILLS_SRC"
+        exit 0
+    fi
 
-    # Run fzf with multi-select
-    selected=$(echo "$skills_list" | fzf --multi --ansi \
-        --header="Space: toggle, Enter: apply" \
-        --bind="space:toggle" \
-        --prompt="Select skills: " \
-        --height=~50% \
-        --reverse)
+    # Run gum choose with multi-select
+    selected=$(gum choose \
+        --no-limit \
+        --header "Select skills (space to toggle, enter to confirm):" \
+        --cursor "> " \
+        --cursor-prefix "○ " \
+        --selected-prefix "● " \
+        --unselected-prefix "○ " \
+        "${selected_args[@]}" \
+        "${skills[@]}")
 
-    [ -z "$selected" ] && echo "No changes made." && exit 0
+    # Handle cancel (Ctrl+C or escape)
+    if [ $? -ne 0 ]; then
+        echo "Cancelled."
+        exit 0
+    fi
 
-    # Toggle selected skills based on their current state
+    # Convert selected output to array
+    local new_enabled=()
     while IFS= read -r line; do
-        [ -z "$line" ] && continue
-        skill=$(echo "$line" | sed 's/^\[.\] //')
-        if [[ "$line" == "[x]"* ]]; then
-            # Currently enabled → disable it
-            disable_skill "$skill"
-            echo "Disabled: $skill"
-        else
-            # Currently disabled → enable it
+        [ -n "$line" ] && new_enabled+=("$line")
+    done <<< "$selected"
+
+    # Sync state: enable newly selected, disable newly deselected
+    for skill in "${skills[@]}"; do
+        local is_selected=false
+        for s in "${new_enabled[@]}"; do
+            [ "$s" = "$skill" ] && is_selected=true && break
+        done
+
+        if $is_selected && ! is_enabled "$skill"; then
             enable_skill "$skill"
             echo "Enabled: $skill"
+        elif ! $is_selected && is_enabled "$skill"; then
+            disable_skill "$skill"
+            echo "Disabled: $skill"
         fi
-    done <<< "$selected"
+    done
 }
 
 case "$1" in
-    "")
-        interactive_mode
-        ;;
-    list)
-        echo "Available skills:"
-        for d in "$SKILLS_SRC"/*/; do
-            [ -d "$d" ] || continue
-            name=$(basename "$d")
-            if is_enabled "$name"; then
-                echo "  [x] $name"
-            else
-                echo "  [ ] $name"
-            fi
-        done
-        ;;
-    enable)
-        if [ -z "$2" ]; then
-            echo "Usage: skills enable <skill>"
-            exit 1
-        fi
-        if enable_skill "$2"; then
-            echo "Enabled: $2"
-        fi
-        ;;
-    disable)
-        if [ -z "$2" ]; then
-            echo "Usage: skills disable <skill>"
-            exit 1
-        fi
-        if [ ! -d "$SKILLS_SRC/$2" ]; then
-            echo "Error: Skill '$2' not found in $SKILLS_SRC"
-            exit 1
-        fi
-        if is_enabled "$2"; then
-            disable_skill "$2"
-            echo "Disabled: $2"
+    ""|"--help"|"-h")
+        if [ -z "$1" ]; then
+            interactive_mode
         else
-            echo "Skill '$2' is not enabled"
+            echo "Usage: skills [init]"
+            echo ""
+            echo "Commands:"
+            echo "  (no args)   Interactive skill picker"
+            echo "  init        Bootstrap from skills.default (fresh install)"
         fi
         ;;
     init)
@@ -142,13 +130,7 @@ case "$1" in
         done < "$DEFAULT_FILE"
         ;;
     *)
-        echo "Usage: skills [list|enable <skill>|disable <skill>|init]"
-        echo ""
-        echo "Commands:"
-        echo "  (no args)         Interactive skill picker (requires fzf)"
-        echo "  list              Show all skills and their status"
-        echo "  enable <skill>    Enable a skill (creates symlink)"
-        echo "  disable <skill>   Disable a skill (removes symlink)"
-        echo "  init              Bootstrap from skills.default (fresh install)"
+        echo "Usage: skills [init]"
+        exit 1
         ;;
 esac
