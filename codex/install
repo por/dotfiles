@@ -1,0 +1,4 @@
+#!/bin/bash
+# Bootstrap Codex skills on fresh install
+
+"$HOME/.dotfiles/agents/skills-manage.sh" init

@@ -1,4 +1,6 @@
 ---
+name: simple-commit
+description: Draft and create a conventional commit based on the current git diff.
 allowed-tools:
 - Bash(git status:*)
 - Bash(git diff:*)
@@ -15,6 +17,6 @@ allowed-tools:
   - Types: feat, fix, docs, style, refactor, test, chore
   - Keep the first line under 72 characters
   - Add a blank line and bullet points for details if needed
-  - Never mention Claude Code
+  - Never mention any specific assistant or product
 4. Stage all changes with 'git add -A'
 5. Commit with the conventional commit message

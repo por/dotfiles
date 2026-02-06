@@ -1,15 +1,15 @@
 #!/bin/bash
-# Manage Claude Code skills via symlinks
-# Symlinks ARE the configuration - no install step needed
+# Manage agent skills via symlinks in a central state directory.
+# App-specific sync scripts consume the state to populate their own config folders.
 
 SKILLS_SRC="$HOME/.dotfiles/agents/skills"
-SKILLS_DST="$HOME/.claude/skills"
+SKILLS_STATE="$HOME/.dotfiles/agents/skills-enabled"
 DEFAULT_FILE="$HOME/.dotfiles/agents/skills.default"
 
-mkdir -p "$SKILLS_DST" || { echo "Error: Cannot create $SKILLS_DST" >&2; exit 1; }
+mkdir -p "$SKILLS_STATE" || { echo "Error: Cannot create $SKILLS_STATE" >&2; exit 1; }
 
 is_enabled() {
-    [ -L "$SKILLS_DST/$1" ]
+    [ -L "$SKILLS_STATE/$1" ]
 }
 
 enable_skill() {
@@ -18,11 +18,19 @@ enable_skill() {
         echo "Error: Skill '$skill' not found in $SKILLS_SRC"
         return 1
     fi
-    ln -sfn "$SKILLS_SRC/$skill" "$SKILLS_DST/$skill"
+    ln -sfn "$SKILLS_SRC/$skill" "$SKILLS_STATE/$skill"
 }
 
 disable_skill() {
-    rm -f "$SKILLS_DST/$1"
+    rm -f "$SKILLS_STATE/$1"
+}
+
+sync_all() {
+    # Find and run app-specific sync scripts, if any.
+    # Each script should read from $HOME/.dotfiles/agents/skills-enabled.
+    find "$HOME/.dotfiles" -name sync -type f -print0 | while IFS= read -r -d '' script; do
+        /bin/bash "$script"
+    done
 }
 
 interactive_mode() {
@@ -87,6 +95,8 @@ interactive_mode() {
             echo "Disabled: $skill"
         fi
     done
+
+    sync_all
 }
 
 case "$1" in
@@ -110,7 +120,7 @@ case "$1" in
 
         # Only bootstrap if no skills are currently enabled
         has_skills=false
-        for link in "$SKILLS_DST"/*; do
+        for link in "$SKILLS_STATE"/*; do
             [ -L "$link" ] && has_skills=true && break
         done
 
@@ -128,6 +138,8 @@ case "$1" in
                 echo "  Enabled: $skill"
             fi
         done < "$DEFAULT_FILE"
+
+        sync_all
         ;;
     *)
         echo "Usage: skills [init]"
