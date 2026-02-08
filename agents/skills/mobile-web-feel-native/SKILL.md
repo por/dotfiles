@@ -1,43 +1,56 @@
 ---
 name: mobile-web-feel-native
-description: "Improve mobile web apps to feel native by auditing and fixing common mobile UX issues (input zooming, accidental horizontal scroll, text selection, zoom behavior, viewport units/address bar issues, CLS, loading feel, caching/optimistic UI, scroll traps like maps). Use when asked to review, diagnose, or polish mobile web UX or interaction performance."
+description: "Improve mobile web apps to feel native by auditing and fixing common mobile UX issues (input zooming, tap highlights, touch delays, overscroll bounce, accidental horizontal scroll, text selection, zoom behavior, viewport units/address bar issues, safe-area padding, CLS, loading feel, caching/optimistic UI, scroll traps like maps, touch target sizing). Use when asked to review, diagnose, or polish mobile web UX or interaction performance."
 ---
 
 # Mobile Web Feel Native
 
 ## Quick Start
 
-- Ask for target devices/browsers, app stack, and the exact screens/flows that feel rough or non-native.
-- Reproduce on a real device or emulator; capture a short screen recording to anchor observations.
-- Use the checklist in `references/mobile-web-feel-native-checklist.md` to identify root causes and fixes.
-- Deliver a prioritized fix list with quick wins first and measurable impact notes.
+- Confirm target devices, browsers, and whether the app runs as a PWA/standalone.
+- Reproduce on a real device or emulator and capture a short screen recording.
+- Run the full checklist in `references/mobile-web-feel-native-checklist.md` and tag each issue as "impact" or "nice-to-have." 
+- Provide fixes with clear tradeoffs and validation steps.
 
 ## Workflow
 
-1. **Confirm scope**
-   - Identify the problematic flows (e.g., login, checkout, search, maps, forms).
-   - Note constraints: accessibility requirements, must-keep pinch zoom, UI framework, performance budgets.
+1. **Scope and constraints**
+   - Identify the exact flows (login, feed, filters, detail view, checkout, maps).
+   - Note accessibility requirements, brand constraints, and app shell expectations.
 
 2. **Observe and categorize**
-   - Classify issues using the checklist categories: input zoom, horizontal scroll, CLS, loading feel, scroll traps, viewport unit bugs, selection/pointer issues, frame drops.
-   - For each issue, note: steps to reproduce, affected devices, and visible impact.
+   - Classify issues using the checklist categories (input zoom, tap highlight/touch delay, overscroll, safe-area padding, selection/pointer issues, layout shift, animation jank, loading feel, scroll traps, horizontal scroll, touch targets).
+   - Record reproduction steps, affected devices, and visible impact.
 
-3. **Propose fixes and tradeoffs**
-   - Provide specific CSS/JS changes and the tradeoffs (e.g., disabling pinch zoom vs accessibility).
-   - Separate **quick wins** (CSS/layout) from **structural fixes** (routing, data caching, optimistic UI).
+3. **Propose fixes**
+   - Provide specific CSS/JS changes and explain why they improve native feel.
+   - Call out tradeoffs (e.g., `user-select: none` scope, overscroll suppression, pinch-zoom decisions).
 
-4. **Validate improvements**
-   - Re-test on device and confirm that the interaction now feels smooth and predictable.
-   - Call out any remaining risks (e.g., long text edge cases, font loading, or map interactions).
+4. **Validate**
+   - Re-test the exact interaction after fixes and confirm no regressions.
+   - List any remaining risks or follow-ups.
+
+## Default Checks (Always Evaluate)
+
+- Input auto-zoom and keyboard occlusion
+- Tap highlight flash and touch delay
+- Overscroll bounce and pull-to-refresh behavior
+- Safe-area top/bottom clearance for sticky controls
+- Accidental text selection on non-text UI
+- Horizontal scroll edge cases
+- Layout stability (CLS)
+- Animation/transition performance
+- Loading responsiveness (optimistic UI or immediate feedback)
+- Scroll traps (maps, embedded scrollers)
+- Touch target size (~44px)
 
 ## Output Format
 
-Provide results in this structure:
-
-- **Summary**: 2–4 sentences on overall UX feel and biggest pain points.
-- **Top Issues (Prioritized)**: Each item should include reproduction steps, cause, and fix.
-- **Quick Wins**: Bullet list of low-effort/high-impact changes.
-- **Follow-ups**: Any deeper refactors, instrumentation, or testing recommendations.
+- **Summary**: 2–4 sentences on overall feel and highest-impact issues.
+- **Top Issues (Prioritized)**: Each item with reproduction, cause, fix, and tradeoff.
+- **Quick Wins**: Low-effort/high-impact fixes.
+- **Follow-ups**: Deeper refactors, instrumentation, or testing recommendations.
+- **Validation Plan**: Concrete steps to confirm improvements.
 
 ## References
 

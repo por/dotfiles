@@ -1,16 +1,12 @@
 # Mobile Web Feel-Native Checklist
 
-## Testing Mindset
+Use this checklist to find common "mobile web tells" and propose fixes. Test on real devices or emulators and validate after changes.
 
-- Test on real devices, not just a resized desktop browser.
-- Record a short screen capture of first-time use and narrate confusion points.
-- Try multiple devices and OS versions when possible.
+## 1) Inputs and Keyboard
 
-## Input Zooming and Keyboard
-
-- Set input font size to 16px or larger on mobile to prevent auto-zoom.
-- Apply a mobile-specific media query to override smaller desktop typography.
-- Ensure focused inputs are not hidden under the keyboard; scroll or reposition as needed.
+- Set input font size to 16px or larger on mobile to prevent iOS auto-zoom.
+- Ensure focused inputs remain visible above the keyboard.
+- Avoid tiny select controls; increase padding for touch targets.
 
 Example CSS:
 
@@ -22,27 +18,56 @@ Example CSS:
     font-size: 16px;
   }
 }
+
+.select-lg {
+  padding: 0.75rem 1rem;
+}
 ```
 
-## Accidental Horizontal Scroll
+## 2) Tap Highlights and Touch Delay
 
-- Identify elements exceeding viewport width; inspect for `100vw`, large images, or long words.
-- Add `min-width: 0` to flex children so content can shrink.
-- Use `max-width: 100%` for images and media.
-- Add `overflow-wrap: anywhere` or `word-break: break-word` for long URLs.
-- Avoid blanket `overflow-x: hidden` unless you are sure no intentional horizontal scroll exists.
+- Remove tap highlight flashes on app-like UIs, especially in PWA/standalone mode.
+- Reduce 300ms double-tap delay without disabling pinch zoom via `touch-action: manipulation`.
+- Keep visible focus styles for keyboard users.
 
-## Pointer Events and Text Selection
+Example CSS:
 
-- Disable `user-select` only for UI elements that should never be selectable (chips, buttons, icons).
-- Avoid disabling selection on body text and links; it harms accessibility and copy/share flows.
-- Use `pointer-events: none` for purely decorative layers that intercept taps.
+```css
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  touch-action: manipulation;
+}
+```
+
+## 3) Overscroll and Pull-to-Refresh
+
+- For full-screen apps, prevent rubber-banding and pull-to-refresh that fights with carousels and drawers.
+- Do not disable overscroll on content-heavy pages where bounce feedback is useful.
+
+Example CSS:
+
+```css
+html,
+body {
+  overscroll-behavior: none;
+}
+```
+
+## 4) Accidental Text Selection and Pointer Events
+
+- Disable selection on UI chrome only (chips, buttons, icons, tabs).
+- Avoid disabling selection on body text and links.
+- Use `pointer-events: none` for decorative layers that intercept taps.
 
 Example CSS:
 
 ```css
 .ui-chip,
-.icon-only {
+.icon-only,
+.button-like {
   user-select: none;
   -webkit-user-select: none;
 }
@@ -52,50 +77,19 @@ Example CSS:
 }
 ```
 
-## Zoom Behavior (App-Like UIs)
+## 5) Horizontal Scroll Edge Cases
 
-- Decide whether pinch-zoom is required for the experience; allow it on content-heavy pages.
-- For app-like flows with fixed headers and maps, consider disabling pinch-zoom and providing explicit image zoom (lightbox/modal).
-- If disabling zoom, document the accessibility tradeoff and ensure text size is legible.
+- Identify elements exceeding viewport width (long words, `100vw`, large images).
+- Add `min-width: 0` to flex children.
+- Use `max-width: 100%` for images and media.
+- Use `overflow-wrap: anywhere` or `word-break: break-word` for URLs.
+- Avoid blanket `overflow-x: hidden` unless deliberate.
 
-Example meta tag (use cautiously):
+## 6) Safe-Area and Viewport Units
 
-```html
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-```
-
-## Frame Consistency
-
-- Use DevTools FPS meter to spot drops and layout thrashing.
-- Prefer `transform` and `opacity` animations over `width`, `height`, or `background-color` on large lists.
-- Reduce heavy watchers and repeated effects; debounce costly observers.
-- Consistent frame rate matters more than peak FPS.
-
-## Full Page Refresh Feel
-
-- Avoid full document reloads between routes; use partial updates or client-side transitions.
-- Prevent a white flash by setting `color-scheme` and body background for dark modes.
-- Prefetch next-page data where possible.
-
-## Slow Loading and Unresponsive UI
-
-- Show immediate feedback for actions; disable buttons while requests are in flight.
-- Use optimistic UI for mutations when safe; rollback on failure.
-- Cache data locally (IndexedDB, in-memory cache) to speed repeat visits.
-- Avoid loaders that freeze the entire UI when only part is loading.
-
-## Cumulative Layout Shift (CLS)
-
-- Reserve space for images and banners with `width`, `height`, or `aspect-ratio`.
-- Avoid injecting UI above the fold after initial render.
-- Stabilize font loading and prevent late swaps from shifting layout.
-- Watch for hydration-driven reflows that jump content.
-
-## Address Bar and Viewport Units
-
-- Use `dvh`, `svh`, or `lvh` for full-height layouts instead of `100vh`.
-- Add bottom padding for toolbars and safe areas: `padding-bottom: env(safe-area-inset-bottom)`.
-- Keep critical buttons away from the browser chrome tap zones.
+- Use `dvh`, `svh`, or `lvh` instead of `100vh` for full-height layouts.
+- Add safe-area padding for sticky headers/footers and floating controls.
+- Keep critical buttons away from browser chrome tap zones.
 
 Example CSS:
 
@@ -104,15 +98,70 @@ Example CSS:
   min-height: 100dvh;
   padding-bottom: env(safe-area-inset-bottom);
 }
+
+.sticky-footer {
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+}
+
+.sticky-top {
+  padding-top: max(1rem, env(safe-area-inset-top));
+}
 ```
 
-## Scroll Traps (Maps, Embedded Scrollers)
+## 7) Full-Screen App Shells
 
-- Avoid full-width maps that hijack scroll; consider “tap to enable map” overlays.
-- Ensure one-finger scrolling still moves the page, not only the embedded content.
-- Test pinch zoom conflicts between map and page.
+- If the experience is intentionally full-screen, prevent body scroll to avoid split scroll contexts.
+- Do not disable body scroll on content-heavy pages.
 
-## Instrumentation (Optional)
+Example CSS:
 
-- Track rage clicks and dead clicks to detect unresponsive UI.
-- Use session replay to see where users get stuck.
+```css
+body {
+  overflow: hidden;
+}
+```
+
+## 8) Layout Stability (CLS)
+
+- Reserve space for images, banners, and ads (`width`, `height`, `aspect-ratio`).
+- Avoid injecting UI above the fold after initial render.
+- Stabilize font loading to prevent late swaps from shifting layout.
+- Watch for hydration reflows that jump content.
+
+## 9) Animation and Frame Consistency
+
+- Avoid `transition: all` on large lists; specify exact properties.
+- Prefer `transform` and `opacity` for animations.
+- Reduce heavy watchers and repeated effects; debounce expensive observers.
+- Consistent frame rate matters more than peak FPS.
+
+## 10) Loading Feel and Responsiveness
+
+- Show immediate feedback for actions; disable buttons while requests are in flight.
+- Use optimistic UI when safe; rollback on failure.
+- Cache data locally (IndexedDB, in-memory) to speed repeat visits.
+- Avoid loaders that freeze the entire UI when only part is loading.
+
+## 11) Navigation and Page Transitions
+
+- Avoid full document reloads between routes.
+- Prevent white flashes by setting `color-scheme` and body background for dark modes.
+- Prefetch data or HTML where possible.
+
+## 12) Scroll Traps (Maps, Embedded Scrollers)
+
+- Avoid full-width maps that hijack scroll; consider "tap to enable map" overlays.
+- Ensure one-finger scrolling moves the page, not only embedded content.
+- Test pinch-zoom conflicts between the map and the page.
+
+## 13) Touch Target Sizing
+
+- Aim for ~44px touch targets on mobile.
+- If font size increases to 16px, verify vertical padding is still sufficient.
+- Use `min-height` or `padding` to meet target size.
+
+## Verification
+
+- Test on iOS Safari and Android Chrome.
+- Test in standalone PWA mode if applicable.
+- Verify: no input zoom, no tap highlight flash, no accidental text selection, no overscroll conflicts, safe-area clearance, stable layout, and consistent animation.
