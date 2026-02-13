@@ -25,6 +25,7 @@ cask 'firefox'            # Web browser
 cask 'google-chrome'      # Web browser
 cask 'imageoptim'         # Tool to optimise images to a smaller size
 cask 'iterm2'             # Terminal emulator as alternative to Apple's Terminal app
+cask 'lm-studio'          # Discover, download, and run local LLMs
 cask 'microsoft-edge'     # Multi-platform web browser
 cask 'mullvad-vpn'        # VPN client
 cask 'netnewswire'        # Free and open-source RSS reader
