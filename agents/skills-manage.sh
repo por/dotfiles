@@ -25,6 +25,70 @@ disable_skill() {
     rm -f "$SKILLS_STATE/$1"
 }
 
+# Fetch a skill from a git repo and copy it into the source dir.
+# Usage: add_skill <repo-url-or-owner/repo> <skill-name>
+add_skill() {
+    local repo="$1" skill="$2"
+
+    if [ -z "$repo" ]; then
+        echo "Usage: skills add <repo-url> --skill <name>"
+        return 1
+    fi
+    if ! command -v git &> /dev/null; then
+        echo "Error: git is required for 'skills add'"
+        return 1
+    fi
+
+    # Expand owner/repo shorthand to a GitHub URL.
+    if [[ "$repo" != *://* && "$repo" =~ ^[^/@:]+/[^/@:]+$ ]]; then
+        repo="https://github.com/$repo"
+    fi
+
+    local tmp
+    tmp=$(mktemp -d) || { echo "Error: cannot create temp dir"; return 1; }
+
+    echo "Cloning $repo ..."
+    if ! git clone --depth 1 "$repo" "$tmp/repo" &> /dev/null; then
+        echo "Error: failed to clone $repo"
+        rm -rf "$tmp"
+        return 1
+    fi
+
+    # Locate the source folder: a dir named "$skill" containing SKILL.md, or
+    # (when no --skill given) the repo root itself if it holds a SKILL.md.
+    local src_dir=""
+    if [ -n "$skill" ]; then
+        src_dir=$(find "$tmp/repo" -type d -name "$skill" \
+            -exec test -f '{}/SKILL.md' \; -print 2>/dev/null | head -1)
+        if [ -z "$src_dir" ]; then
+            echo "Error: skill '$skill' (with a SKILL.md) not found in $repo"
+            rm -rf "$tmp"
+            return 1
+        fi
+    elif [ -f "$tmp/repo/SKILL.md" ]; then
+        src_dir="$tmp/repo"
+        skill=$(basename "$repo" .git)
+    else
+        echo "Error: no --skill given and repo root has no SKILL.md"
+        rm -rf "$tmp"
+        return 1
+    fi
+
+    local dest="$SKILLS_SRC/$skill"
+    if [ -e "$dest" ]; then
+        echo "Error: '$skill' already exists at $dest (remove it first to re-add)"
+        rm -rf "$tmp"
+        return 1
+    fi
+
+    cp -R "$src_dir" "$dest" || { echo "Error: copy failed"; rm -rf "$tmp"; return 1; }
+    rm -rf "$dest/.git"
+    rm -rf "$tmp"
+
+    echo "Added '$skill' to $SKILLS_SRC"
+    echo "Enable it by running: skills pick"
+}
+
 sync_all() {
     # Find and run app-specific sync scripts, if any.
     # Each script should read from $HOME/.dotfiles/agents/skills-enabled.
@@ -101,15 +165,28 @@ interactive_mode() {
 
 case "$1" in
     ""|"--help"|"-h")
-        if [ -z "$1" ]; then
-            interactive_mode
-        else
-            echo "Usage: skills [init]"
-            echo ""
-            echo "Commands:"
-            echo "  (no args)   Interactive skill picker"
-            echo "  init        Bootstrap from skills.default (fresh install)"
-        fi
+        echo "Usage: skills <command>"
+        echo ""
+        echo "Commands:"
+        echo "  pick                           Interactive skill picker"
+        echo "  add <repo> --skill <name>      Fetch a skill from a git repo into the source dir"
+        echo "  init                           Bootstrap from skills.default (fresh install)"
+        ;;
+    pick)
+        interactive_mode
+        ;;
+    add)
+        shift
+        repo=""
+        skill=""
+        while [ $# -gt 0 ]; do
+            case "$1" in
+                --skill) skill="$2"; [ -n "$skill" ] || { echo "Error: --skill needs a value"; exit 1; }; shift 2 ;;
+                --skill=*) skill="${1#*=}"; shift ;;
+                *) repo="$1"; shift ;;
+            esac
+        done
+        add_skill "$repo" "$skill"
         ;;
     init)
         # Bootstrap from skills.default (for fresh installs)
@@ -142,7 +219,7 @@ case "$1" in
         sync_all
         ;;
     *)
-        echo "Usage: skills [init]"
+        echo "Usage: skills <command>  (run 'skills' for help)"
         exit 1
         ;;
 esac
