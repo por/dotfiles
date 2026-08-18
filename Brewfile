@@ -4,7 +4,6 @@ cask_args appdir: '/Applications'
 brew 'act'                # Run your GitHub Actions locally
 brew 'cloudflared'        # Cloudflare Tunnel client
 brew 'coreutils'          # GNU File, Shell, and Text utilities
-brew 'create-dmg'         # Shell script to build fancy DMGs
 brew 'ffmpeg'             # Play, record, convert, and stream audio and video
 brew 'fzf'                # Command-line fuzzy finder written in Go
 brew 'gh'                 # GitHub command-line tool
