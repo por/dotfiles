@@ -80,7 +80,5 @@ go.sum text eol=lf
 *.rb diff=ruby
 
 # Don’t allow merging of lockfiles (must be resolved manually)
-package-lock.json merge=binary
-yarn.lock merge=binary
 Gemfile.lock merge=binary
 Cargo.lock merge=binary
