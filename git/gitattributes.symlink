@@ -87,6 +87,5 @@ go.sum text eol=lf
 # Don’t allow merging of lockfiles (must be resolved manually)
 package-lock.json merge=binary
 yarn.lock merge=binary
-pnpm-lock.yaml merge=binary
 Gemfile.lock merge=binary
 Cargo.lock merge=binary
