@@ -72,11 +72,6 @@ go.sum text eol=lf
 *.pdf binary
 *.db binary
 
-# Git LFS (Large File Storage)
-*.psd filter=lfs diff=lfs merge=lfs -text
-*.ai filter=lfs diff=lfs merge=lfs -text
-*.sketch filter=lfs diff=lfs merge=lfs -text
-
 # Better diffs for specific file types
 *.css diff=css
 *.html diff=html
