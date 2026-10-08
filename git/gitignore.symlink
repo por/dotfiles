@@ -105,13 +105,6 @@ env/
 .bundle/
 vendor/bundle/
 
-# Go
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-
 # Rust
 target/
 Cargo.lock

@@ -14,7 +14,6 @@
 *.py text eol=lf
 *.rb text eol=lf
 *.php text eol=lf
-*.go text eol=lf
 *.rs text eol=lf
 
 # Config files
@@ -47,7 +46,6 @@ yarn.lock text eol=lf
 pnpm-lock.yaml text eol=lf
 Gemfile.lock text eol=lf
 Cargo.lock text eol=lf
-go.sum text eol=lf
 
 # Binary files
 *.png binary

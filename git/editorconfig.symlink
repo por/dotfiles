@@ -17,9 +17,6 @@ indent_size = 2
 [*.{py,rb}]
 indent_size = 4
 
-[*.go]
-indent_style = tab
-
 [*.md]
 trim_trailing_whitespace = false
 
