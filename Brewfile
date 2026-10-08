@@ -7,6 +7,7 @@ brew 'coreutils'          # GNU File, Shell, and Text utilities
 brew 'ffmpeg'             # Play, record, convert, and stream audio and video
 brew 'fzf'                # Command-line fuzzy finder written in Go
 brew 'gh'                 # GitHub command-line tool
+brew 'git-lfs'            # Git extension for versioning large files
 brew 'gum'                # Tool for glamorous shell scripts
 brew 'jq'                 # Lightweight and flexible command-line JSON processor
 brew 'mise'               # Polyglot runtime manager (asdf rust clone)
