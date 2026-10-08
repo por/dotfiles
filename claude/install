@@ -1,4 +1,12 @@
 #!/bin/bash
-# Bootstrap Claude Code skills on fresh install
+# Bootstrap Claude Code skills and global instructions on fresh install
 
 "$HOME/.dotfiles/agents/skills-manage.sh" init
+
+# A machine's own CLAUDE.md is kept as CLAUDE.md.backup to merge by hand
+target="$HOME/.claude/CLAUDE.md"
+mkdir -p "$HOME/.claude"
+if [ -f "$target" ] && [ ! -L "$target" ]; then
+    mv "$target" "$target.backup"
+fi
+ln -sfn "$HOME/.dotfiles/claude/CLAUDE.md" "$target"
