@@ -1,3 +1,4 @@
 # Default skills for fresh installs
 # Used by 'skills init' to bootstrap on new machines
 simple-commit
+handoff
