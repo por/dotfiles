@@ -35,6 +35,7 @@ cask 'sf-symbols'         # Tool that provides consistent, highly configurable s
 cask 'signal'             # Instant messaging application focusing on security
 cask 'slack'              # Team communication and collaboration software
 cask 'tableplus'          # Native GUI tool for relational databases
+cask 'tailscale-app'      # Mesh VPN based on WireGuard
 cask 'transmission'       # Lightweight BitTorrent client
 cask 'visual-studio-code' # Open-source code editor
 cask 'vlc'                # Multimedia player
