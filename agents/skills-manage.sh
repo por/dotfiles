@@ -90,8 +90,8 @@ add_skill() {
 }
 
 sync_all() {
-    # With -L, -type l matches only broken symlinks: skills deleted from the source dir.
-    find -L "$SKILLS_STATE" -type l -delete
+    # Broken symlinks are skills deleted from the source dir.
+    find "$SKILLS_STATE" -maxdepth 1 -type l ! -exec test -e {} \; -exec rm {} +
 
     # Find and run app-specific sync scripts, if any.
     # Each script should read from $HOME/.dotfiles/agents/skills-enabled.
