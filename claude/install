@@ -10,3 +10,10 @@ if [ -f "$target" ] && [ ! -L "$target" ]; then
     mv "$target" "$target.backup"
 fi
 ln -sfn "$HOME/.dotfiles/claude/CLAUDE.md" "$target"
+
+# Claude Code rewrites settings.json itself, so only statusLine is set here; the
+# rest stays per machine
+settings="$HOME/.claude/settings.json"
+[ -f "$settings" ] || echo '{}' > "$settings"
+jq '.statusLine = {"type": "command", "command": "~/.dotfiles/claude/statusline.sh"}' "$settings" > "$settings.tmp" \
+    && mv "$settings.tmp" "$settings"
