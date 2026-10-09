@@ -1,0 +1,7 @@
+[tools]
+node = "lts"
+pnpm = "latest" # pnpm 10+ switches to each project's packageManager version
+python = "3.12"
+
+[settings]
+idiomatic_version_file_enable_tools = ["node"]

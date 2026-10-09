@@ -1,0 +1,12 @@
+#!/bin/bash
+# Link the global mise config and install its tools
+
+# A machine's own config is kept as config.toml.backup to merge by hand
+target="$HOME/.config/mise/config.toml"
+mkdir -p "$(dirname "$target")"
+if [ -f "$target" ] && [ ! -L "$target" ]; then
+    mv "$target" "$target.backup"
+fi
+ln -sfn "$HOME/.dotfiles/mise/config.toml" "$target"
+
+mise install
