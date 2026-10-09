@@ -15,6 +15,7 @@
     for (;;) {
       try {
         const res = await fetch(`${RELAY}/next`);
+        if (!res.ok) throw new Error(`Relay answered ${res.status}`);
         status.textContent = 'Connected to relay';
         if (res.status === 200) parent.postMessage({ pluginMessage: await res.json() }, '*');
       } catch {

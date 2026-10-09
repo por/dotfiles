@@ -43,6 +43,9 @@ function serve() {
   };
 
   createServer(async (req, res) => {
+    // The CLI sends no Origin and the plugin iframe sends "null"; anything else is a webpage.
+    if (req.headers.origin !== undefined && req.headers.origin !== 'null') return send(res, 403);
+
     if (req.method === 'GET' && req.url === '/next') {
       lastPoll = Date.now();
       const timer = setTimeout(() => send(res, 204), 25_000);
