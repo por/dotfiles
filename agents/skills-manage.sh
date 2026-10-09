@@ -1,6 +1,6 @@
 #!/bin/bash
 # Manage agent skills via symlinks in a central state directory.
-# App-specific sync scripts consume the state to populate their own config folders.
+# sync_all mirrors the state into each app's skills folder.
 
 SKILLS_SRC="$HOME/.dotfiles/agents/skills"
 SKILLS_STATE="$HOME/.dotfiles/agents/skills-enabled"
@@ -89,14 +89,28 @@ add_skill() {
     echo "Enable it by running: skills pick"
 }
 
+# Mirror the enabled skills into an app's skills folder as symlinks.
+sync_to() {
+    local dst="$1"
+    mkdir -p "$dst"
+
+    for link in "$SKILLS_STATE"/*; do
+        [ -L "$link" ] || continue
+        ln -sfn "$SKILLS_SRC/$(basename "$link")" "$dst/$(basename "$link")"
+    done
+
+    for link in "$dst"/*; do
+        [ -L "$link" ] || continue
+        [ -L "$SKILLS_STATE/$(basename "$link")" ] || rm -f "$link"
+    done
+}
+
 sync_all() {
     # Broken symlinks are skills deleted from the source dir.
     find "$SKILLS_STATE" -maxdepth 1 -type l ! -exec test -e {} \; -exec rm {} +
 
-    # Find and run app-specific sync scripts, if any.
-    # Each script should read from $HOME/.dotfiles/agents/skills-enabled.
-    find "$HOME/.dotfiles" -name sync -type f -print0 | while IFS= read -r -d '' script; do
-        /bin/bash "$script"
+    for dst in "$HOME/.claude/skills" "${CODEX_HOME:-$HOME/.codex}/skills"; do
+        sync_to "$dst"
     done
 }
 
