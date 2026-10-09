@@ -1,4 +1,4 @@
-# Local/private config goes in the include
+# .private last: its per-remote identity overrides .local's user.
 [include]
   path = ~/.gitconfig.local
   path = ~/.gitconfig.private
