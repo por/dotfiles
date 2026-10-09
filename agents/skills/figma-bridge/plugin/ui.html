@@ -14,9 +14,11 @@
   (async () => {
     for (;;) {
       try {
+        // /next holds the request open for up to 25s; the root answers at once.
+        await fetch(RELAY);
+        status.textContent = 'Connected to relay';
         const res = await fetch(`${RELAY}/next`);
         if (!res.ok) throw new Error(`Relay answered ${res.status}`);
-        status.textContent = 'Connected to relay';
         if (res.status === 200) parent.postMessage({ pluginMessage: await res.json() }, '*');
       } catch {
         status.textContent = 'Waiting for relay on :7865';
