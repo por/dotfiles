@@ -12,6 +12,8 @@
   lg = log --graph --pretty=format:'%C(yellow)%h%Cblue%d%Creset %s %C(white) %an, %ar%Creset'
   df = diff --word-diff
   count = !git shortlog -sn
+[branch]
+  sort = -committerdate
 [color]
   [color "diff"]
     meta = yellow bold

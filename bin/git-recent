@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+# Usage: git recent [count]
+#
+# List the most recently committed local branches with how far each is
+# ahead/behind the default branch and the state of its upstream.
+
+count=${1:-15}
+
+git rev-parse --git-dir >/dev/null || exit 1
+
+base=$(git symbolic-ref -q --short refs/remotes/origin/HEAD)
+if [ -z "$base" ]; then
+  for ref in origin/main origin/master main master; do
+    git rev-parse -q --verify "$ref" >/dev/null && base=$ref && break
+  done
+fi
+if [ -z "$base" ]; then
+  echo "git recent: no default branch found" >&2
+  exit 1
+fi
+
+[ -t 1 ] && color=1
+
+list() {
+  git for-each-ref refs/heads --sort=-committerdate --count="$count" \
+    --format="%(HEAD)%1f%(refname:short)%1f%(committerdate:relative)%1f%(ahead-behind:$base)%1f%(upstream)%1f%(upstream:track)%1f%(subject)" |
+  awk -F '\037' -v base="$base" -v color="$color" '
+    BEGIN { w1 = length("branch"); w2 = length("updated"); w3 = length("vs " base); w4 = length("status") }
+    {
+      split($4, ab, " ")
+      if ($2 == base || "origin/" $2 == base) status = "base"
+      else if (ab[1] == 0) status = "merged"
+      else if ($6 == "[gone]") status = "gone"
+      else if ($5 == "") status = "local"
+      else if ($6 == "") status = "pushed"
+      else if ($6 ~ /ahead/ && $6 ~ /behind/) status = "diverged"
+      else if ($6 ~ /ahead/) { sub(/.*ahead /, "", $6); sub(/]/, "", $6); status = $6 " unpushed" }
+      else { sub(/.*behind /, "", $6); sub(/]/, "", $6); status = $6 " to pull" }
+
+      n++
+      cur[n] = $1; name[n] = $2; date[n] = $3
+      diff[n] = (status == "base") ? "" : "+" ab[1] " -" ab[2]
+      stat[n] = status; subj[n] = $7
+      if (length($2) > w1) w1 = length($2)
+      if (length($3) > w2) w2 = length($3)
+      if (length(diff[n]) > w3) w3 = length(diff[n])
+      if (length(status) > w4) w4 = length(status)
+    }
+    END {
+      fmt = "%s %-" w1 "s  %-" w2 "s  %-" w3 "s  %-" w4 "s  %s"
+
+      line = sprintf(fmt, " ", "branch", "updated", "vs " base, "status", "subject")
+      print (color ? "\033[1m" line "\033[0m" : line)
+      for (i = 1; i <= n; i++) {
+        line = sprintf(fmt, cur[i] == "*" ? "*" : " ", name[i], date[i], diff[i], stat[i], subj[i])
+        if (color && cur[i] == "*") line = "\033[32m" line "\033[0m"
+        else if (color && (stat[i] == "merged" || stat[i] == "gone")) line = "\033[2m" line "\033[0m"
+        print line
+      }
+    }
+  '
+}
+
+if [ -n "$color" ]; then
+  # Turn off line wrapping so the terminal clips long subjects at its edge.
+  trap 'printf "\033[?7h"' EXIT
+  printf '\033[?7l'
+fi
+list
