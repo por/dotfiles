@@ -1,13 +1,15 @@
 #!/bin/sh
-# Claude Code status line: branch · model and effort · context used · 5-hour limit used and reset time
-# · 7-day limit used, colored when ahead of the week's pace, and reset day and time
+# Claude Code status line: no-sandbox warning · branch · model and effort · context used
+# · 5-hour limit used and reset time · 7-day limit used, colored when ahead of the week's
+# pace, and reset day and time
 
 # Colors are Claude Code's dark-theme warning and error colors.
-{ read -r dir; read -r usage; } <<JSON
+{ read -r dir; read -r project; read -r usage; } <<JSON
 $(jq -r 'def color($v; $warn; $crit):
     (if $v >= $crit then "255;107;128" elif $v >= $warn then "255;193;7" else null end) as $rgb
     | if $rgb then "\u001b[38;2;\($rgb)m\(.)\u001b[0m" else . end;
   .workspace.current_dir,
+  .workspace.project_dir // .workspace.current_dir,
   ((.context_window // {}) as $c | (($c.used_percentage // 0) * ($c.context_window_size // 0) / 100) as $t
     | [ [.model.display_name, .effort.level] | map(select(.)) | join(" ") ]
     + [ "ctx \("\($t / 1000 | floor)K" | color($t; 100000; 150000))" ]
@@ -21,5 +23,10 @@ $(jq -r 'def color($v; $warn; $crit):
     | join(" · "))')
 JSON
 
+# First file that sets sandbox.enabled wins; managed settings and --settings are not read
+sandbox=$(cat "$project/.claude/settings.local.json" "$project/.claude/settings.json" "$HOME/.claude/settings.json" 2>/dev/null \
+    | jq -s 'map(.sandbox.enabled | select(. != null)) | first // false')
+[ "$sandbox" = true ] || warning='\033[38;2;255;107;128mno sandbox\033[0m · '
+
 branch=$(git -C "$dir" branch --show-current 2>/dev/null)
-printf '%s\n' "${branch:+$branch · }$usage"
+printf '%b%s\n' "$warning" "${branch:+$branch · }$usage"
