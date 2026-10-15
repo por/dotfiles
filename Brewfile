@@ -18,8 +18,10 @@ cask 'airflow'            # Watch local content on Apple TV and Chromecast
 cask 'brave-browser'      # Web browser focusing on privacy
 cask 'bruno'              # Open source IDE for exploring and testing APIs
 cask 'calibre'            # E-books management software
+cask 'chatgpt'            # OpenAI's official ChatGPT desktop app
 cask 'claude'             # Anthropic's official Claude AI desktop app
 cask 'claude-code'        # Terminal-based AI coding assistant
+cask 'codex'              # OpenAI's coding agent that runs in your terminal
 cask 'figma'              # Collaborative team software
 cask 'firefox'            # Web browser
 cask 'google-chrome'      # Web browser
