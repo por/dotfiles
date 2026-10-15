@@ -49,6 +49,7 @@ dist/
 dist-ssr/
 *.local
 .npm
+.pnpm-store/
 .eslintcache
 .node_repl_history
 
