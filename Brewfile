@@ -20,12 +20,10 @@ cask 'bruno'              # Open source IDE for exploring and testing APIs
 cask 'calibre'            # E-books management software
 cask 'chatgpt'            # OpenAI's official ChatGPT desktop app
 cask 'claude'             # Anthropic's official Claude AI desktop app
-cask 'claude-code'        # Terminal-based AI coding assistant
 cask 'codex'              # OpenAI's coding agent that runs in your terminal
 cask 'figma'              # Collaborative team software
 cask 'firefox'            # Web browser
 cask 'google-chrome'      # Web browser
-cask 'imageoptim'         # Tool to optimise images to a smaller size
 cask 'iterm2'             # Terminal emulator as alternative to Apple's Terminal app
 cask 'lm-studio'          # Discover, download, and run local LLMs
 cask 'microsoft-edge'     # Multi-platform web browser
@@ -42,4 +40,3 @@ cask 'transmission'       # Lightweight BitTorrent client
 cask 'visual-studio-code' # Open-source code editor
 cask 'vlc'                # Multimedia player
 cask 'whatsapp'           # Native desktop client for WhatsApp
-cask 'zoom'               # Video communication and virtual meeting platform
