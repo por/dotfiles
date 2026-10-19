@@ -1,7 +1,8 @@
 #!/bin/sh
-# Claude Code status line: no-sandbox warning · branch, with * when uncommitted · model and
-# effort · context used · 5-hour limit used and reset time · 7-day limit used, colored when
-# ahead of the week's pace, and reset day and time
+# Claude Code status line: no-sandbox warning · branch, with Pure's * when uncommitted and
+# ⇣⇡ when behind or ahead of upstream · model and effort · context used · 5-hour limit used
+# and reset time · 7-day limit used, colored when ahead of the week's pace, and reset day
+# and time
 
 # Colors are Claude Code's dark-theme warning and error colors.
 { read -r dir; read -r project; read -r usage; } <<JSON
@@ -29,5 +30,8 @@ sandbox=$(cat "$project/.claude/settings.local.json" "$project/.claude/settings.
 [ "$sandbox" = true ] || warning='\033[38;2;255;107;128mno sandbox\033[0m · '
 
 branch=$(git -C "$dir" branch --show-current 2>/dev/null)
-[ -n "$branch" ] && [ -n "$(git -C "$dir" --no-optional-locks status --porcelain 2>/dev/null)" ] && branch="$branch*"
+[ -n "$branch" ] && branch=$(git -C "$dir" --no-optional-locks status --porcelain=v2 --branch 2>/dev/null | awk -v b="$branch" '
+    /^# branch\.ab / { ahead = $3 != "+0"; behind = $4 != "-0" }
+    !/^#/ { dirty = "*" }
+    END { printf "%s%s%s%s%s", b, dirty, ahead || behind ? " " : "", behind ? "⇣" : "", ahead ? "⇡" : "" }')
 printf '%b%s\n' "$warning" "${branch:+$branch · }$usage"
