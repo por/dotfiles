@@ -11,9 +11,20 @@ if [ -f "$target" ] && [ ! -L "$target" ]; then
 fi
 ln -sfn "$HOME/.dotfiles/claude/CLAUDE.md" "$target"
 
-# Claude Code rewrites settings.json itself, so only statusLine is set here; the
-# rest stays per machine
+# Claude Code rewrites settings.json itself, so the keys in claude/settings.json
+# are merged over it and the rest stays per machine. Deny rules are combined.
 settings="$HOME/.claude/settings.json"
 [ -f "$settings" ] || echo '{}' > "$settings"
-jq '.statusLine = {"type": "command", "command": "~/.dotfiles/claude/statusline.sh"}' "$settings" > "$settings.tmp" \
+jq -s '(.[0].permissions.deny // []) as $local
+    | .[0] * .[1]
+    | .permissions.deny = ($local + .permissions.deny | unique)' \
+    "$settings" "$HOME/.dotfiles/claude/settings.json" > "$settings.tmp" \
     && mv "$settings.tmp" "$settings"
+
+claude plugin list --json | jq -e 'any(.[]; .id == "pr-review-toolkit@claude-plugins-official")' >/dev/null \
+    || claude plugin install pr-review-toolkit --marketplace https://github.com/anthropics/claude-plugins-official.git
+
+# User-scope MCP servers live in ~/.claude.json, which Claude Code also rewrites,
+# so they go through the CLI. Figma is the desktop app's local server.
+claude mcp get Figma >/dev/null 2>&1 \
+    || claude mcp add --transport http -s user Figma http://127.0.0.1:3845/mcp

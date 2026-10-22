@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
+  "permissions": {
+    "deny": [
+      "Read(~/.ssh/**)",
+      "Read(~/Library/Application Support/mkcert/rootCA-key.pem)",
+      "Read(~/.codex/auth.json)",
+      "Read(~/.config/rclone/**)",
+      "Read(~/.config/gh/**)",
+      "Read(~/Library/Preferences/.wrangler/**)"
+    ],
+    "defaultMode": "auto"
+  },
+  "disableClaudeAiConnectors": true,
+  "statusLine": {
+    "type": "command",
+    "command": "~/.dotfiles/claude/statusline.sh"
+  },
+  "tui": "fullscreen",
+  "alwaysThinkingEnabled": true,
+  "agentPushNotifEnabled": true,
+  "enableWorkflows": true,
+  "skipWorkflowUsageWarning": true
+}
