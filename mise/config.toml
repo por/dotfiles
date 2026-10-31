@@ -2,6 +2,7 @@
 node = "lts"
 pnpm = "latest" # pnpm 10+ switches to each project's packageManager version
 python = "3.12"
+uv = "latest"
 
 [settings]
 idiomatic_version_file_enable_tools = ["node"]

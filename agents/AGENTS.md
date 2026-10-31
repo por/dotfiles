@@ -23,3 +23,8 @@ actually wrong, not merely different from what I would have written.
 
 Labels on a repeated block (design tokens, config entries, enum cases): all or
 nothing. A partial set is worse than none.
+
+# Python
+
+Use `uv` (`uv run`, `uv pip`, `uvx`) for Python packages, never plain `pip`:
+its config refuses packages published in the last day.

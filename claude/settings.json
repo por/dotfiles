@@ -30,7 +30,8 @@
     "filesystem": {
       "allowWrite": [
         "~/Library/pnpm",
-        "~/.npm"
+        "~/.npm",
+        "~/.cache/uv"
       ]
     },
     "network": {

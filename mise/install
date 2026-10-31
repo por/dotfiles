@@ -10,3 +10,10 @@ fi
 ln -sfn "$HOME/.dotfiles/mise/config.toml" "$target"
 
 mise install
+
+mkdir -p "$HOME/.config/uv"
+ln -sfn "$HOME/.dotfiles/mise/uv.toml" "$HOME/.config/uv/uv.toml"
+
+# npm writes auth tokens to ~/.npmrc, so it is edited in place and never linked
+mise exec -- npm config set --location=user min-release-age 1
+mise exec -- npm config set --location=user ignore-scripts true
