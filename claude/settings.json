@@ -12,9 +12,38 @@
       "Read(~/.codex/auth.json)",
       "Read(~/.config/rclone/**)",
       "Read(~/.config/gh/**)",
-      "Read(~/Library/Preferences/.wrangler/**)"
+      "Read(~/Library/Preferences/.wrangler/**)",
+      "Read(~/.aws/**)",
+      "Bash(gh auth *)"
+    ],
+    "ask": [
+      "Bash(dangerouslyDisableSandbox:true)",
+      "Bash(gh repo delete *)"
     ],
     "defaultMode": "auto"
+  },
+  "sandbox": {
+    "enabled": true,
+    "excludedCommands": [
+      "gh *"
+    ],
+    "filesystem": {
+      "allowWrite": [
+        "~/Library/pnpm",
+        "~/.npm"
+      ]
+    },
+    "network": {
+      "allowedDomains": [
+        "registry.npmjs.org",
+        "pypi.org",
+        "files.pythonhosted.org",
+        "github.com",
+        "*.github.com",
+        "*.githubusercontent.com"
+      ],
+      "allowLocalBinding": true
+    }
   },
   "disableClaudeAiConnectors": true,
   "statusLine": {
