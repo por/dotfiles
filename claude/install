@@ -9,7 +9,7 @@ mkdir -p "$HOME/.claude"
 if [ -f "$target" ] && [ ! -L "$target" ]; then
     mv "$target" "$target.backup"
 fi
-ln -sfn "$HOME/.dotfiles/claude/CLAUDE.md" "$target"
+ln -sfn "$HOME/.dotfiles/agents/AGENTS.md" "$target"
 
 # Claude Code rewrites settings.json itself, so the keys in claude/settings.json
 # are merged over it and the rest stays per machine. Deny rules are combined.

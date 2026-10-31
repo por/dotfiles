@@ -1,4 +1,12 @@
 #!/bin/bash
-# Bootstrap Codex skills on fresh install
+# Bootstrap Codex skills and global instructions on fresh install
 
 "$HOME/.dotfiles/agents/skills-manage.sh" init
+
+# A machine's own AGENTS.md is kept as AGENTS.md.backup to merge by hand
+target="$HOME/.codex/AGENTS.md"
+mkdir -p "$HOME/.codex"
+if [ -f "$target" ] && [ ! -L "$target" ]; then
+    mv "$target" "$target.backup"
+fi
+ln -sfn "$HOME/.dotfiles/agents/AGENTS.md" "$target"
