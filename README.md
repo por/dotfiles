@@ -39,6 +39,8 @@ set-defaults
 
 See `~/.dotfiles/macos/README.md` for details on what settings are applied and how to customize them.
 
+Run `check-security` now and then to see whether FileVault, the firewall, Gatekeeper, automatic updates and the other security settings are still on. It only reports.
+
 `dot` is a simple script that installs some dependencies, sets sane OS X
 defaults, and so on. Occasionally run `dot` from time to time to keep the environment fresh and up-to-date. This script lives in `bin/`.
 

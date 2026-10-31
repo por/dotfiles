@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+#
+# check-security
+#
+# Reports macOS security settings that have drifted. Changes nothing.
+
+fails=0
+check() {
+  if eval "$2" >/dev/null 2>&1; then
+    echo "✓ $1"
+  else
+    echo "✗ $1"
+    fails=$((fails + 1))
+  fi
+}
+
+# Missing SoftwareUpdate keys mean the macOS default, which is on
+update_on() {
+  [ "$(defaults read /Library/Preferences/com.apple.SoftwareUpdate "$1" 2>/dev/null)" != 0 ]
+}
+
+fw=/usr/libexec/ApplicationFirewall/socketfilterfw
+login=/Library/Preferences/com.apple.loginwindow
+
+check "FileVault on"                   'fdesetup status | grep -q "On\."'
+check "System Integrity Protection on" 'csrutil status | grep -q enabled'
+check "Gatekeeper on"                  'spctl --status | grep -q "assessments enabled"'
+check "Firewall on"                    '$fw --getglobalstate | grep -q enabled'
+check "Firewall stealth mode on"       '$fw --getstealthmode | grep -q " on"'
+check "Check for updates"              'update_on AutomaticCheckEnabled'
+check "Download updates"               'update_on AutomaticDownload'
+check "Install security responses"     'update_on CriticalUpdateInstall'
+check "Install XProtect data"          'update_on ConfigDataInstall'
+check "Password right after sleep"     'sysadminctl -screenLock status 2>&1 | grep -q immediate'
+check "Guest account off"              '[ "$(defaults read $login GuestEnabled 2>/dev/null)" != 1 ]'
+check "Automatic login off"            '! defaults read $login autoLoginUser'
+check "No Remote Login, File or Screen Sharing listening" \
+  '! netstat -anv -p tcp | awk "/LISTEN/ {print \$4}" | grep -Eq "\.(22|445|5900)$"'
+
+exit $((fails > 0))
