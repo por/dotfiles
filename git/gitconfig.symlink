@@ -14,21 +14,19 @@
   count = !git shortlog -sn
 [branch]
   sort = -committerdate
-[color]
-  [color "diff"]
-    meta = yellow bold
-    frag = magenta bold
-    old = red bold
-    new = green bold
-  [color "status"]
-    added = yellow
-    changed = green
-    untracked = cyan
-  [color "branch"]
-    current = yellow reverse
-    local = yellow
-    remote = green
-  ui = auto
+[color "diff"]
+  meta = yellow bold
+  frag = magenta bold
+  old = red bold
+  new = green bold
+[color "status"]
+  added = yellow
+  changed = green
+  untracked = cyan
+[color "branch"]
+  current = yellow reverse
+  local = yellow
+  remote = green
 [core]
   excludesfile = ~/.gitignore
   attributesfile = ~/.gitattributes
@@ -42,9 +40,10 @@
 [difftool]
   prompt = false
 [help]
-  autocorrect = 1
+  autocorrect = prompt
 [push]
   default = current
+  autoSetupRemote = true
 [pull]
   ff = only
 [init]
@@ -54,11 +53,16 @@
   tags = true
 [rebase]
   autoStash = true
+  autoSquash = true
+  updateRefs = true
 [rerere]
   enabled = true
 [diff]
   algorithm = histogram
   renames = copies
+  colorMoved = default
+[tag]
+  sort = version:refname
 [merge]
   log = true
   conflictstyle = zdiff3

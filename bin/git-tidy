@@ -1,0 +1,48 @@
+#!/bin/bash
+#
+# Usage: git tidy
+#
+# Delete local branches that are merged into the default branch or whose
+# upstream is gone, which is how a squash-merged PR looks. Lists them and
+# asks first. Skips the default branch and anything checked out in a worktree.
+
+git rev-parse --git-dir >/dev/null || exit 1
+
+git fetch --prune --quiet || echo "git tidy: fetch failed, using local state" >&2
+
+base=$(git symbolic-ref -q --short refs/remotes/origin/HEAD)
+if [ -z "$base" ]; then
+  for ref in origin/main origin/master main master; do
+    git rev-parse -q --verify "$ref" >/dev/null && base=$ref && break
+  done
+fi
+if [ -z "$base" ]; then
+  echo "git tidy: no default branch found" >&2
+  exit 1
+fi
+
+keep=$(
+  echo "${base#origin/}"
+  git worktree list --porcelain | sed -n 's|^branch refs/heads/||p'
+)
+
+branches=$(
+  {
+    git for-each-ref --merged="$base" --format='%(refname:short)' refs/heads
+    git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads |
+      awk '$2 == "[gone]" { print $1 }'
+  } | sort -u | grep -vxF -f <(echo "$keep")
+)
+
+if [ -z "$branches" ]; then
+  echo "Nothing to tidy."
+  exit 0
+fi
+
+echo "Merged into $base or gone from the remote:"
+echo "$branches" | awk '{ print "  " $0 }'
+read -r -p "Delete $(echo "$branches" | wc -l | tr -d ' ') branches? [y/N] " answer
+[ "$answer" = y ] || [ "$answer" = Y ] || exit 0
+
+echo "$branches" | xargs git branch -D
+git worktree prune
