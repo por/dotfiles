@@ -29,8 +29,20 @@ do
 done
 
 # initialize autocomplete here, otherwise functions won't be loaded
-autoload -U compinit
-compinit
+# Full check once a day, which also picks up newly installed completions;
+# otherwise load the cached dump. compinit only rewrites the dump when the
+# number of completion files changes, so it is touched to restart the day.
+autoload -Uz compinit
+() {
+  setopt localoptions extendedglob
+  local dump=${ZDOTDIR:-$HOME}/.zcompdump
+  if [[ -f $dump(#qN.mh-24) ]]; then
+    compinit -C -d $dump
+  else
+    compinit -d $dump
+    touch $dump
+  fi
+}
 
 # load every completion after autocomplete loads
 for file in ${(M)config_files:#*/completion.zsh}
