@@ -44,14 +44,30 @@ write_source() {
     } > "$dest/.source"
 }
 
-has_license() {
+# True when a tree has a license file at its top level.
+tree_has_license() {
+    git -C "$1" ls-tree --name-only "$2" | tr '[:upper:]' '[:lower:]' | grep -q '^licen[cs]e'
+}
+
+# First license file at the root of a commit, or nothing.
+root_license() {
     local f
-    for f in "$1"/*; do
-        case "$(basename "$f" | tr '[:upper:]' '[:lower:]')" in
-            licen[cs]e*) return 0 ;;
-        esac
+    for f in LICENSE LICENSE.md LICENSE.txt LICENCE; do
+        if git -C "$1" rev-parse -q --verify "$2:$f" > /dev/null; then
+            echo "$f"
+            return
+        fi
     done
-    return 1
+}
+
+# Temp dir for clones and snapshots, removed when the script exits.
+start_work() {
+    if ! command -v git &> /dev/null; then
+        echo "Error: git is required for 'skills $1'"
+        return 1
+    fi
+    WORK=$(mktemp -d) || { echo "Error: cannot create temp dir"; return 1; }
+    trap 'rm -rf "$WORK"' EXIT
 }
 
 # Fetch a skill from a git repo and copy it into the source dir.
@@ -63,69 +79,64 @@ add_skill() {
         echo "Usage: skills add <repo-url> --skill <name> [--ref <tag-or-branch>]"
         return 1
     fi
-    if ! command -v git &> /dev/null; then
-        echo "Error: git is required for 'skills add'"
+    if [ -n "$skill" ] && [[ ! "$skill" =~ ^[A-Za-z0-9._-]+$ || "$skill" = "." || "$skill" = ".." ]]; then
+        echo "Error: '$skill' is not a skill folder name"
         return 1
     fi
+    start_work add || return 1
 
     # Expand owner/repo shorthand to a GitHub URL.
     if [[ "$repo" != *://* && "$repo" =~ ^[^/@:]+/[^/@:]+$ ]]; then
         repo="https://github.com/$repo"
     fi
 
-    local tmp
-    tmp=$(mktemp -d) || { echo "Error: cannot create temp dir"; return 1; }
-
     echo "Cloning $repo ${ref:+at $ref }..."
-    if ! git clone --depth 1 ${ref:+--branch "$ref"} "$repo" "$tmp/repo" &> /dev/null; then
-        echo "Error: failed to clone $repo${ref:+ at $ref}"
-        rm -rf "$tmp"
+    local clone commit
+    clone=$(clone_repo "$repo") || { echo "Error: failed to clone $repo"; return 1; }
+    if [ -z "$ref" ]; then
+        commit=$(git -C "$clone" rev-parse -q --verify 'HEAD^{commit}')
+    else
+        commit=$(git -C "$clone" rev-parse -q --verify "refs/tags/$ref^{commit}" \
+            || git -C "$clone" rev-parse -q --verify "refs/remotes/origin/$ref^{commit}")
+    fi
+    if [ -z "$commit" ]; then
+        echo "Error: ${ref:+no tag or branch '$ref' in }${ref:-cannot read the default branch of }$repo"
         return 1
     fi
 
     # Locate the source folder: a dir named "$skill" containing SKILL.md, or
     # (when no --skill given) the repo root itself if it holds a SKILL.md.
-    local src_dir=""
+    local path
     if [ -n "$skill" ]; then
-        src_dir=$(find "$tmp/repo" -type d -name "$skill" \
-            -exec test -f '{}/SKILL.md' \; -print 2>/dev/null | head -1)
-        if [ -z "$src_dir" ]; then
+        path=$(git -C "$clone" ls-tree -r -z --name-only "$commit" | tr '\0' '\n' |
+            awk -v s="$skill/SKILL.md" '$0 == s || substr($0, length($0) - length(s)) == "/" s { print; exit }')
+        path="${path%/SKILL.md}"
+        if [ -z "$path" ]; then
             echo "Error: skill '$skill' (with a SKILL.md) not found in $repo"
-            rm -rf "$tmp"
             return 1
         fi
-    elif [ -f "$tmp/repo/SKILL.md" ]; then
-        src_dir="$tmp/repo"
+    elif git -C "$clone" rev-parse -q --verify "$commit:SKILL.md" > /dev/null; then
+        path="."
         skill=$(basename "$repo" .git)
     else
         echo "Error: no --skill given and repo root has no SKILL.md"
-        rm -rf "$tmp"
         return 1
     fi
 
     local dest="$SKILLS_SRC/$skill"
-    if [ -e "$dest" ]; then
+    if [ -e "$dest" ] || [ -L "$dest" ]; then
         echo "Error: '$skill' already exists at $dest (remove it first to re-add)"
-        rm -rf "$tmp"
         return 1
     fi
 
-    local path="${src_dir#"$tmp/repo"}" commit license="" f
-    path="${path#/}"
-    [ -n "$path" ] || path="."
-    commit=$(git -C "$tmp/repo" rev-parse HEAD)
-    extract_skill "$tmp/repo" "$commit" "$path" "" "$dest" \
-        || { echo "Error: copy failed"; rm -rf "$tmp" "$dest"; return 1; }
-    if [ "$path" != "." ] && ! has_license "$dest"; then
-        for f in LICENSE LICENSE.md LICENSE.txt LICENCE; do
-            if git -C "$tmp/repo" cat-file -e "$commit:$f" 2>/dev/null; then
-                git -C "$tmp/repo" show "$commit:$f" > "$dest/$f" && license="$f"
-                break
-            fi
-        done
+    local license=""
+    if [ "$path" != "." ] && ! tree_has_license "$clone" "$commit:$path"; then
+        license=$(root_license "$clone" "$commit")
     fi
+    fetch_blobs "$clone" "$commit" -- "$path" ${license:+"$license"}
+    extract_skill "$clone" "$commit" "$path" "$license" "$dest" \
+        || { echo "Error: copy failed"; rm -rf "$dest"; return 1; }
     write_source "$dest" "$repo" "$path" "$commit" "$ref" "$license"
-    rm -rf "$tmp"
 
     echo "Added '$skill' to $SKILLS_SRC"
     echo "Enable it by running: skills pick"
@@ -144,6 +155,23 @@ clone_repo() {
 
 skill_tree() {
     if [ "$2" = "." ]; then echo "$1^{tree}"; else echo "$1:$2"; fi
+}
+
+# A blob:none clone fetches a blob when it is first read, which can take one
+# request per file; this fetches all missing blobs under paths in one request.
+# Usage: fetch_blobs <clone> <commit>... -- <path>...
+fetch_blobs() {
+    local clone="$1" trees=() missing
+    shift
+    while [ $# -gt 0 ] && [ "$1" != "--" ]; do
+        trees+=("$1^{tree}")
+        shift
+    done
+    missing=$(git -C "$clone" --literal-pathspecs rev-list --objects --missing=print "${trees[@]}" "$@" |
+        sed -n 's/^?//p')
+    [ -z "$missing" ] && return 0
+    echo "$missing" | git -C "$clone" -c fetch.negotiationAlgorithm=noop fetch -q --no-tags \
+        --no-write-fetch-head --recurse-submodules=no --filter=blob:none --stdin origin
 }
 
 # Write a skill folder as of a commit into dest, plus the recorded license file.
@@ -179,6 +207,16 @@ newest_release() {
             substr($0, 1, length(p)) == p && substr($0, length(p) + 1) ~ /^[0-9]+(\.[0-9]+)*$/ { print; exit }'
 }
 
+# A leftover .<name>.old is a previous version that recovery could not put back.
+old_left_behind() {
+    local old="$SKILLS_SRC/.$1.old"
+    if [ -e "$old" ] || [ -L "$old" ]; then
+        echo "Error: $1: $old is left from an interrupted update; move or delete it, then update again"
+        return 0
+    fi
+    return 1
+}
+
 # Bring one skill to the latest upstream commit, or the newest release when
 # its ref is a tag. Shows what changes and asks before replacing the folder.
 update_skill() {
@@ -191,6 +229,11 @@ update_skill() {
         echo "$skill: no .source, so it was written here or its source is unknown. Skipped."
         return 0
     fi
+    if [ -L "$dir" ]; then
+        echo "Error: $skill: $dir is a symlink, and updating would replace the link; update the folder it points to instead"
+        return 1
+    fi
+    old_left_behind "$skill" && return 1
 
     local repo path commit ref license notes
     repo=$(source_get "$skill" repo)
@@ -229,13 +272,28 @@ update_skill() {
         return 1
     fi
 
+    # The recorded license comes from the repo root; when upstream renames or
+    # drops it, the update copies the root's current license file, if any.
+    local old_license="$license" new_license="$license"
+    if [ -n "$license" ]; then
+        git -C "$clone" rev-parse -q --verify "$commit:$license" > /dev/null || old_license=""
+        if ! git -C "$clone" rev-parse -q --verify "$target:$license" > /dev/null; then
+            new_license=""
+            tree_has_license "$clone" "$(skill_tree "$target" "$path")" \
+                || new_license=$(root_license "$clone" "$target")
+            echo "$skill: $license is gone from the root of $repo at ${target:0:7};" \
+                "${new_license:+copying $new_license instead}${new_license:-no license file is copied}"
+        fi
+    fi
+
     # Commits elsewhere in the repo leave the skill as it was; only the
     # recorded commit moves.
-    local old_tree new_tree
+    local old_tree new_tree old_lic_blob="" new_lic_blob=""
     old_tree=$(git -C "$clone" rev-parse "$(skill_tree "$commit" "$path")")
     new_tree=$(git -C "$clone" rev-parse "$(skill_tree "$target" "$path")")
-    if [ "$old_tree" = "$new_tree" ] && { [ -z "$license" ] \
-        || [ "$(git -C "$clone" rev-parse "$commit:$license")" = "$(git -C "$clone" rev-parse "$target:$license" 2>/dev/null)" ]; }; then
+    [ -n "$old_license" ] && old_lic_blob=$(git -C "$clone" rev-parse "$commit:$old_license")
+    [ -n "$new_license" ] && new_lic_blob=$(git -C "$clone" rev-parse "$target:$new_license")
+    if [ "$old_tree" = "$new_tree" ] && [ "$old_license" = "$new_license" ] && [ "$old_lic_blob" = "$new_lic_blob" ]; then
         if [ "$target" != "$commit" ] || [ "${new_ref:-$ref}" != "$ref" ]; then
             write_source "$dir" "$repo" "$path" "$target" "${new_ref:-$ref}" "$license" "$notes"
         fi
@@ -245,8 +303,9 @@ update_skill() {
 
     local work="$WORK/$skill"
     mkdir -p "$work/current"
-    extract_skill "$clone" "$commit" "$path" "$license" "$work/recorded" \
-        && extract_skill "$clone" "$target" "$path" "$license" "$work/new" \
+    fetch_blobs "$clone" "$commit" "$target" -- "$path" ${old_license:+"$old_license"} ${new_license:+"$new_license"}
+    extract_skill "$clone" "$commit" "$path" "$old_license" "$work/recorded" \
+        && extract_skill "$clone" "$target" "$path" "$new_license" "$work/new" \
         || { echo "Error: $skill: failed to read $repo"; return 1; }
     cp -R "$dir/." "$work/current/" && rm -f "$work/current/.source"
 
@@ -257,14 +316,17 @@ update_skill() {
     if ! diff -rq "$work/recorded" "$work/current" > /dev/null; then
         echo ""
         echo "  Local edits since ${commit:0:7}, which the update replaces:"
-        (cd "$work" && git diff --no-index --stat recorded current | sed 's/^/  /')
+        (cd "$work" && git -c core.quotePath=false diff --no-index --stat recorded current | sed 's/^/  /')
     fi
 
     echo ""
-    (cd "$work" && git diff --no-index --stat current new | sed 's/^/  /')
-    local scripts
-    scripts=$(cd "$work" && git diff --no-index --name-status --no-renames current new |
-        awk -F '\t' '{ f = $NF; sub(/^[^\/]*\//, "", f); if (f !~ /\.md$/) print $1 "  " f }' | sort -u)
+    (cd "$work" && git -c core.quotePath=false diff --no-index --stat current new | sed 's/^/  /')
+    local scripts status file
+    scripts=$(cd "$work" && git diff --no-index -z --name-status --no-renames current new |
+        while IFS= read -r -d '' status && IFS= read -r -d '' file; do
+            file="${file#*/}"
+            case "$file" in *.md) ;; *) echo "$status  $file" ;; esac
+        done | sort -u)
     if [ -n "$scripts" ]; then
         echo ""
         echo "  Files that are not Markdown, so read them before applying (A added, M changed, D deleted):"
@@ -276,7 +338,7 @@ update_skill() {
         echo ""
         read -r -p "Update $skill? [y]es, [d]iff, [N]o: " answer
         case "$answer" in
-            d|D) (cd "$work" && git diff --no-index current new) ;;
+            d|D) (cd "$work" && git -c core.quotePath=false diff --no-index current new) ;;
             y|Y) break ;;
             *) echo "Skipped $skill"; return 0 ;;
         esac
@@ -285,9 +347,10 @@ update_skill() {
     # Built beside the old folder and swapped in, so a failed copy leaves the
     # old version and its .source in place.
     local staged="$SKILLS_SRC/.$skill.new" old="$SKILLS_SRC/.$skill.old"
-    rm -rf "$staged" "$old"
+    rm -rf "$staged"
+    old_left_behind "$skill" && return 1
     if ! { mkdir "$staged" && cp -R "$work/new/." "$staged/" \
-        && write_source "$staged" "$repo" "$path" "$target" "$new_ref" "$license" "$notes"; }; then
+        && write_source "$staged" "$repo" "$path" "$target" "$new_ref" "$new_license" "$notes"; }; then
         rm -rf "$staged"
         echo "Error: $skill: failed to copy the new version; $dir is unchanged"
         return 1
@@ -306,16 +369,9 @@ update_skill() {
     echo "Updated $skill to ${target:0:7}${new_ref:+ ($new_ref)}"
 }
 
-update_skills() {
-    if ! command -v git &> /dev/null; then
-        echo "Error: git is required for 'skills update'"
-        return 1
-    fi
-    WORK=$(mktemp -d) || { echo "Error: cannot create temp dir"; return 1; }
-    trap 'rm -rf "$WORK"' EXIT
-
-    # A run stopped between the two renames in update_skill leaves the
-    # previous version in .<name>.old; staged .<name>.new copies are disposable.
+# A run stopped between the two renames in update_skill leaves the previous
+# version in .<name>.old; staged .<name>.new copies are disposable.
+recover_interrupted() {
     local d name live
     for d in "$SKILLS_SRC"/.*.old; do
         [ -d "$d" ] || continue
@@ -333,8 +389,11 @@ update_skills() {
     for d in "$SKILLS_SRC"/.*.new; do
         [ -d "$d" ] && rm -rf "$d"
     done
+}
 
-    local skills=("$@") failed=0
+update_skills() {
+    start_work update || return 1
+    local skills=("$@") d failed=0
     if [ ${#skills[@]} -eq 0 ]; then
         for d in "$SKILLS_SRC"/*/; do
             [ -f "$d/.source" ] && skills+=("$(basename "$d")")
@@ -436,6 +495,8 @@ interactive_mode() {
 
     sync_all
 }
+
+recover_interrupted
 
 case "$1" in
     ""|"--help"|"-h")
