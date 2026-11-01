@@ -1,3 +1,7 @@
+# Applies to every repo, so only names that are never real source belong here.
+# A folder name like logs/ or env/ would also hide app/logs/page.tsx or
+# src/env/ everywhere; those go in each project's own .gitignore.
+
 # macOS
 .DS_Store
 ._*
@@ -6,20 +10,12 @@
 .AppleDouble
 .LSOverride
 
-# Editor directories and files
+# Editors
 .idea/
 *.swp
 *.swo
 *~
-.vim/
 *.sublime-workspace
-*.sublime-project
-.project
-.settings/
-.classpath
-.claude/
-
-# IDE - VSCode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -27,98 +23,34 @@
 !.vscode/extensions.json
 *.code-workspace
 
-# Environment variables
+# Agents: personal settings and worktrees, not the shared .claude/ config
+.claude/settings.local.json
+.claude/worktrees/
+CLAUDE.local.md
+
+# Secrets
 .env
 .env.*
-.env.local
-.env.*.local
 !.env.example
 
 # Logs
-logs/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-# Node.js
+# Node.js and framework caches
 node_modules/
-dist/
-dist-ssr/
-*.local
-.npm
 .pnpm-store/
+.npm
 .eslintcache
 .node_repl_history
-
-# Build outputs
-build/
-out/
-target/
-*.min.js
-*.min.css
-
-# Testing
-coverage/
-.nyc_output/
-*.lcov
-.coverage
-
-# Cache directories
+*.tsbuildinfo
+.next/
+.astro/
+.turbo/
+.vercel/
 .cache/
 .parcel-cache/
-.next/
-.nuxt/
-.vuepress/dist
-.serverless/
-.fusebox/
-
-# Temporary files
-*.tmp
-*.temp
-tmp/
-temp/
-TODO
-
-# OS generated files
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
 
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
-.Python
 .venv/
-venv/
-ENV/
-env/
-
-# Ruby
-*.gem
-*.rbc
-.bundle/
-vendor/bundle/
-
-# Rust
-target/
-Cargo.lock
-
-# Archives
-*.7z
-*.dmg
-*.gz
-*.iso
-*.jar
-*.rar
-*.tar
-*.zip
-
-# Database
-*.sqlite
-*.db
