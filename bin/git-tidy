@@ -2,47 +2,65 @@
 #
 # Usage: git tidy
 #
-# Delete local branches that are merged into the default branch or whose
-# upstream is gone, which is how a squash-merged PR looks. Lists them and
-# asks first. Skips the default branch and anything checked out in a worktree.
+# Delete local branches that are merged into the default branch, or whose
+# upstream is gone and whose changes are all in the default branch, which is
+# how a squash-merged PR looks. Lists them and asks first. Skips the default
+# branch, anything checked out in a worktree, and gone branches with work that
+# is not in the default branch.
 
 git rev-parse --git-dir >/dev/null || exit 1
 
 git fetch --prune --quiet || echo "git tidy: fetch failed, using local state" >&2
+git worktree prune
 
-base=$(git symbolic-ref -q --short refs/remotes/origin/HEAD)
-if [ -z "$base" ]; then
-  for ref in origin/main origin/master main master; do
-    git rev-parse -q --verify "$ref" >/dev/null && base=$ref && break
-  done
-fi
-if [ -z "$base" ]; then
-  echo "git tidy: no default branch found" >&2
-  exit 1
-fi
+base=$(git default-branch) || exit 1
 
 keep=$(
   echo "${base#origin/}"
   git worktree list --porcelain | sed -n 's|^branch refs/heads/||p'
 )
 
-branches=$(
-  {
-    git for-each-ref --merged="$base" --format='%(refname:short)' refs/heads
-    git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads |
-      awk '$2 == "[gone]" { print $1 }'
-  } | sort -u | grep -vxF -f <(echo "$keep")
-)
+# A squash of the branch onto its merge base that git cherry finds in base
+# means every change on the branch already landed there.
+squash_merged() {
+  local branch=$1 squash
+  squash=$(git commit-tree "refs/heads/$branch^{tree}" -p "$(git merge-base "$base" "refs/heads/$branch")" -m tidy) || return 1
+  [[ $(git cherry "$base" "$squash") == -* ]]
+}
 
-if [ -z "$branches" ]; then
+merged=$(git for-each-ref --merged="$base" --format='%(refname:lstrip=2)' refs/heads | grep -vxF -f <(echo "$keep"))
+squashed=""
+unmerged=""
+for branch in $(git for-each-ref --format='%(refname:lstrip=2) %(upstream:track)' refs/heads |
+  awk '$2 == "[gone]" { print $1 }' | grep -vxF -f <(echo "$keep")); do
+  echo "$merged" | grep -qxF "$branch" && continue
+  if squash_merged "$branch"; then
+    squashed+="$branch"$'\n'
+  else
+    ahead=$(git rev-list --count "$base..refs/heads/$branch")
+    [ "$ahead" = 1 ] && word=commit || word=commits
+    unmerged+="  $branch ($ahead $word not in $base)"$'\n'
+  fi
+done
+squashed=${squashed%$'\n'}
+
+if [ -n "$unmerged" ]; then
+  echo "Gone from the remote but with work not in $base, so kept:"
+  printf '%s' "$unmerged"
+  echo "  Delete one with: git branch -D <branch>"
+  echo ""
+fi
+
+if [ -z "$merged" ] && [ -z "$squashed" ]; then
   echo "Nothing to tidy."
   exit 0
 fi
 
-echo "Merged into $base or gone from the remote:"
-echo "$branches" | awk '{ print "  " $0 }'
-read -r -p "Delete $(echo "$branches" | wc -l | tr -d ' ') branches? [y/N] " answer
+echo "Merged into $base:"
+printf '%s\n' "$merged" "$squashed" | grep -v '^$' | awk '{ print "  " $0 }'
+count=$(printf '%s\n' "$merged" "$squashed" | grep -c .)
+read -r -p "Delete $count branches? [y/N] " answer
 [ "$answer" = y ] || [ "$answer" = Y ] || exit 0
 
-echo "$branches" | xargs git branch -D
-git worktree prune
+[ -z "$merged" ] || echo "$merged" | xargs git branch -d
+[ -z "$squashed" ] || echo "$squashed" | xargs git branch -D

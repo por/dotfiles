@@ -9,22 +9,13 @@ count=${1:-15}
 
 git rev-parse --git-dir >/dev/null || exit 1
 
-base=$(git symbolic-ref -q --short refs/remotes/origin/HEAD)
-if [ -z "$base" ]; then
-  for ref in origin/main origin/master main master; do
-    git rev-parse -q --verify "$ref" >/dev/null && base=$ref && break
-  done
-fi
-if [ -z "$base" ]; then
-  echo "git recent: no default branch found" >&2
-  exit 1
-fi
+base=$(git default-branch) || exit 1
 
 [ -t 1 ] && color=1
 
 list() {
   git for-each-ref refs/heads --sort=-committerdate --count="$count" \
-    --format="%(HEAD)%1f%(refname:short)%1f%(committerdate:relative)%1f%(ahead-behind:$base)%1f%(upstream)%1f%(upstream:track)%1f%(subject)" |
+    --format="%(HEAD)%1f%(refname:lstrip=2)%1f%(committerdate:relative)%1f%(ahead-behind:$base)%1f%(upstream)%1f%(upstream:track)%1f%(subject)" |
   awk -F '\037' -v base="$base" -v color="$color" '
     BEGIN { w1 = length("branch"); w2 = length("updated"); w3 = length("vs " base); w4 = length("status") }
     {

@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+# Usage: git default-branch
+#
+# Print the branch other branches are compared against: origin's HEAD, else
+# the first of origin/main, origin/master, main and master that exists.
+
+if base=$(git symbolic-ref -q --short refs/remotes/origin/HEAD); then
+  echo "$base"
+  exit 0
+fi
+
+for ref in refs/remotes/origin/main refs/remotes/origin/master refs/heads/main refs/heads/master; do
+  if git show-ref -q --verify "$ref"; then
+    case $ref in
+      refs/remotes/*) echo "${ref#refs/remotes/}" ;;
+      *) echo "${ref#refs/heads/}" ;;
+    esac
+    exit 0
+  fi
+done
+
+echo "git default-branch: no default branch found" >&2
+exit 1

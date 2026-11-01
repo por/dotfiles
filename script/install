@@ -10,5 +10,7 @@ cd "$(dirname $0)"/..
 echo "› brew bundle"
 brew bundle
 
-# find the installers and run them iteratively
-find . -name install -type f -not -path './script/*' | while read installer ; do sh -c "${installer}" ; done
+# Each topic's installer, one level deep: agents/skills holds third-party repos
+for installer in ./*/install; do
+  [ "$installer" = ./script/install ] || [ ! -f "$installer" ] || sh -c "$installer"
+done
