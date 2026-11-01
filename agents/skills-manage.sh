@@ -159,20 +159,24 @@ extract_skill() {
     fi
 }
 
-# Newest release tag with the same prefix as ref (v, web3/v, release-), or ref
+# Newest release tag with the same prefix as ref (v, py3-v, release-), or ref
 # itself when nothing newer exists. Pre-release suffixes sort below the release,
 # and a tag with no trailing version only follows itself.
 newest_release() {
-    local clone="$1" ref="$2" prefix
-    prefix=$(printf '%s' "$ref" | sed -E 's/[0-9]+(\.[0-9]+)*(-.*)?$//')
-    if [ "$prefix" = "$ref" ]; then
+    local clone="$1" ref="$2" v="$2" prefix
+    local re_pre='^(.*)-(alpha|beta|rc|pre|preview|dev|next|canary)[.0-9]*$'
+    local re_ver='^(.*[^0-9.])?[0-9]+(\.[0-9]+)*$'
+    [[ $v =~ $re_pre ]] && v="${BASH_REMATCH[1]}"
+    if [[ $v =~ $re_ver ]]; then
+        prefix="${BASH_REMATCH[1]}"
+    else
         echo "$ref"
         return
     fi
     git -C "$clone" -c versionsort.suffix=- tag --list "$prefix*" --sort=-v:refname |
         awk -v p="$prefix" -v ref="$ref" '
             $0 == ref { print; exit }
-            index($0, p) == 1 && substr($0, length(p) + 1) ~ /^[0-9]+(\.[0-9]+)*$/ { print; exit }'
+            substr($0, 1, length(p)) == p && substr($0, length(p) + 1) ~ /^[0-9]+(\.[0-9]+)*$/ { print; exit }'
 }
 
 # Bring one skill to the latest upstream commit, or the newest release when
@@ -311,16 +315,23 @@ update_skills() {
     trap 'rm -rf "$WORK"' EXIT
 
     # A run stopped between the two renames in update_skill leaves the
-    # previous version in .<name>.old.
-    local d name
+    # previous version in .<name>.old; staged .<name>.new copies are disposable.
+    local d name live
     for d in "$SKILLS_SRC"/.*.old; do
         [ -d "$d" ] || continue
         name=$(basename "$d" .old)
         name="${name#.}"
-        if [ ! -e "$SKILLS_SRC/$name" ]; then
-            mv "$d" "$SKILLS_SRC/$name" && echo "Restored $name from an interrupted update"
+        live="$SKILLS_SRC/$name"
+        if [ -d "$live" ] && [ ! -L "$live" ]; then
+            rm -rf "$d"
+        elif [ ! -e "$live" ] && [ ! -L "$live" ] && mv "$d" "$live"; then
+            echo "Restored $name from an interrupted update"
+        else
+            echo "Warning: $d holds the previous $name, but it could not be put back at $live"
         fi
-        rm -rf "$d" "$SKILLS_SRC/.$name.new"
+    done
+    for d in "$SKILLS_SRC"/.*.new; do
+        [ -d "$d" ] && rm -rf "$d"
     done
 
     local skills=("$@") failed=0
