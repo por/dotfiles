@@ -25,9 +25,10 @@ keep=$(
 squash_merged() {
   local ref="refs/heads/$1" mb
   mb=$(git merge-base "$base" "$ref") || return 1
+  # diff-tree, unlike log and diff, ignores diff.relative and diff.ignoreSubmodules.
   [ -z "$(LC_ALL=C comm -12 \
-    <(git log -m --format= --name-only --no-renames "$mb..$ref" | LC_ALL=C sort -u) \
-    <(git diff --name-only --no-renames "$base" "$ref" | LC_ALL=C sort -u))" ]
+    <(git rev-list "$mb..$ref" | git diff-tree --stdin -r -m --root --no-commit-id --name-only --no-renames | LC_ALL=C sort -u) \
+    <(git diff-tree -r --name-only --no-renames "$base" "$ref" | LC_ALL=C sort -u))" ]
 }
 
 merged=$(git for-each-ref --merged="$base" --format='%(refname:lstrip=2)' refs/heads | grep -vxF -f <(echo "$keep"))
