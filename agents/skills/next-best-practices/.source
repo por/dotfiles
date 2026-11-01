@@ -1,4 +1,0 @@
-repo: https://github.com/vercel-labs/next-skills
-path: skills/next-best-practices
-commit: dc1de9caf7612d73f56a8dec3cb1bd6c9ec096b9
-# Removed upstream in ae552b1 (moved to vercel/next.js, which has no next-best-practices skill); this is the last version.
