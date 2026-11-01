@@ -20,12 +20,12 @@ keep=$(
   git worktree list --porcelain | sed -n 's|^branch refs/heads/||p'
 )
 
-# A squash of the branch onto its merge base that git cherry finds in base
-# means every change on the branch already landed there.
+# Merging the branch into base changes nothing only when every change on it,
+# byte for byte, already landed there. Needs git 2.38+.
 squash_merged() {
-  local branch=$1 squash
-  squash=$(git commit-tree "refs/heads/$branch^{tree}" -p "$(git merge-base "$base" "refs/heads/$branch")" -m tidy) || return 1
-  [[ $(git cherry "$base" "$squash") == -* ]]
+  local tree
+  tree=$(git merge-tree --write-tree "$base" "refs/heads/$1" 2>/dev/null) || return 1
+  [ "$tree" = "$(git rev-parse "$base^{tree}")" ]
 }
 
 merged=$(git for-each-ref --merged="$base" --format='%(refname:lstrip=2)' refs/heads | grep -vxF -f <(echo "$keep"))
@@ -62,5 +62,4 @@ count=$(printf '%s\n' "$merged" "$squashed" | grep -c .)
 read -r -p "Delete $count branches? [y/N] " answer
 [ "$answer" = y ] || [ "$answer" = Y ] || exit 0
 
-[ -z "$merged" ] || echo "$merged" | xargs git branch -d
-[ -z "$squashed" ] || echo "$squashed" | xargs git branch -D
+printf '%s\n' "$merged" "$squashed" | grep -v '^$' | xargs git branch -D
