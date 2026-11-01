@@ -1,7 +1,7 @@
 # dotfiles
 
 - **bin/**: Anything in `bin/` will get added to the `$PATH` and be made available everywhere.
-- **Brewfile**: This is a list of applications for [Homebrew Cask](http://caskroom.io) to install: things like Chrome and 1Password and stuff.
+- **Brewfile**: The command-line tools and apps that `brew bundle` installs.
 - **topic/\*.zsh**: Any files ending in `.zsh` get loaded into the environment.
 - **topic/path.zsh**: Any file named `path.zsh` is loaded first and is expected to setup `$PATH` or similar.
 - **topic/completion.zsh**: Any file named `completion.zsh` is loaded last and is expected to setup autocomplete.
@@ -19,12 +19,6 @@ script/bootstrap
 
 This will symlink the appropriate files in `.dotfiles` to the home directory. The initial run will take a while to finish.
 
-Next thing we need to do is set `zsh` as the default shell:
-
-```
-chsh -s /bin/zsh
-```
-
 Import the Oceanic-Next iTerm color profile and select it in iTerm color preferences:
 
 ```
@@ -41,8 +35,9 @@ See `~/.dotfiles/macos/README.md` for details on what settings are applied and h
 
 Run `check-security` now and then to see whether FileVault, the firewall, Gatekeeper, automatic updates and the other security settings are still on. It only reports.
 
-`dot` is a simple script that installs some dependencies, sets sane OS X
-defaults, and so on. Occasionally run `dot` from time to time to keep the environment fresh and up-to-date. This script lives in `bin/`.
+Run `dot` now and then to keep things up to date: it updates Homebrew, installs
+everything in the Brewfile and runs each topic's `install` script. It lives in
+`bin/`.
 
 ## thanks
 
