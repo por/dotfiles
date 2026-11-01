@@ -35,6 +35,8 @@ See `~/.dotfiles/macos/README.md` for details on what settings are applied and h
 
 Run `check-security` now and then to see whether FileVault, the firewall, Gatekeeper, automatic updates and the other security settings are still on. It only reports.
 
+Agent skills for Claude Code and Codex live in `agents/skills`. `skills pick` chooses which are enabled, `skills add <repo> --skill <name>` copies one in, and `skills update` brings copied skills up to date, showing what changed and asking first. Each copied skill has a `.source` file with its repo, path and commit.
+
 Run `dot` now and then to keep things up to date: it updates Homebrew, installs
 everything in the Brewfile and runs each topic's `install` script. It lives in
 `bin/`.

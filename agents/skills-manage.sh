@@ -25,13 +25,42 @@ disable_skill() {
     rm -f "$SKILLS_STATE/$1"
 }
 
+# .source records where a copied skill came from: repo, path, commit, and
+# optionally ref (a release tag or branch to follow) and license (a file
+# from the repo root). Lines starting with # are notes and are kept.
+source_get() {
+    sed -n "s/^$2: //p" "$SKILLS_SRC/$1/.source" | head -1
+}
+
+write_source() {
+    local dest="$1" repo="$2" path="$3" commit="$4" ref="$5" license="$6" notes="$7"
+    {
+        echo "repo: $repo"
+        echo "path: $path"
+        echo "commit: $commit"
+        if [ -n "$ref" ]; then echo "ref: $ref"; fi
+        if [ -n "$license" ]; then echo "license: $license"; fi
+        if [ -n "$notes" ]; then echo "$notes"; fi
+    } > "$dest/.source"
+}
+
+has_license() {
+    local f
+    for f in "$1"/*; do
+        case "$(basename "$f" | tr '[:upper:]' '[:lower:]')" in
+            licen[cs]e*) return 0 ;;
+        esac
+    done
+    return 1
+}
+
 # Fetch a skill from a git repo and copy it into the source dir.
-# Usage: add_skill <repo-url-or-owner/repo> <skill-name>
+# Usage: add_skill <repo-url-or-owner/repo> <skill-name> [ref]
 add_skill() {
-    local repo="$1" skill="$2"
+    local repo="$1" skill="$2" ref="$3"
 
     if [ -z "$repo" ]; then
-        echo "Usage: skills add <repo-url> --skill <name>"
+        echo "Usage: skills add <repo-url> --skill <name> [--ref <tag-or-branch>]"
         return 1
     fi
     if ! command -v git &> /dev/null; then
@@ -47,9 +76,9 @@ add_skill() {
     local tmp
     tmp=$(mktemp -d) || { echo "Error: cannot create temp dir"; return 1; }
 
-    echo "Cloning $repo ..."
-    if ! git clone --depth 1 "$repo" "$tmp/repo" &> /dev/null; then
-        echo "Error: failed to clone $repo"
+    echo "Cloning $repo ${ref:+at $ref }..."
+    if ! git clone --depth 1 ${ref:+--branch "$ref"} "$repo" "$tmp/repo" &> /dev/null; then
+        echo "Error: failed to clone $repo${ref:+ at $ref}"
         rm -rf "$tmp"
         return 1
     fi
@@ -83,10 +112,160 @@ add_skill() {
 
     cp -R "$src_dir" "$dest" || { echo "Error: copy failed"; rm -rf "$tmp"; return 1; }
     rm -rf "$dest/.git"
+
+    local path="${src_dir#"$tmp/repo"}" license="" f
+    path="${path#/}"
+    [ -n "$path" ] || path="."
+    if [ "$path" != "." ] && ! has_license "$dest"; then
+        for f in LICENSE LICENSE.md LICENSE.txt LICENCE; do
+            if [ -f "$tmp/repo/$f" ]; then
+                cp "$tmp/repo/$f" "$dest/" && license="$f"
+                break
+            fi
+        done
+    fi
+    write_source "$dest" "$repo" "$path" "$(git -C "$tmp/repo" rev-parse HEAD)" "$ref" "$license"
     rm -rf "$tmp"
 
     echo "Added '$skill' to $SKILLS_SRC"
     echo "Enable it by running: skills pick"
+}
+
+# Clone each repo once per run, without blobs until a commit is read.
+clone_repo() {
+    local repo="$1" dir
+    dir="$WORK/clones/$(printf '%s' "$repo" | tr -c 'A-Za-z0-9.-' '_')"
+    if [ ! -d "$dir" ]; then
+        mkdir -p "$WORK/clones"
+        git clone -q --filter=blob:none --no-checkout "$repo" "$dir" &> /dev/null || return 1
+    fi
+    echo "$dir"
+}
+
+# Write a skill folder as of a commit into dest, plus the recorded license file.
+extract_skill() {
+    local clone="$1" commit="$2" path="$3" license="$4" dest="$5" tree="$2:$3"
+    [ "$path" = "." ] && tree="$commit"
+    mkdir -p "$dest"
+    git -C "$clone" archive --format=tar "$tree" | tar -x -C "$dest" || return 1
+    if [ -n "$license" ]; then
+        git -C "$clone" show "$commit:$license" > "$dest/$(basename "$license")" || return 1
+    fi
+}
+
+# Bring one skill to the latest upstream commit, or the newest release when
+# its ref is a tag. Shows what changes and asks before replacing the folder.
+update_skill() {
+    local skill="$1" dir="$SKILLS_SRC/$1"
+    if [[ ! "$skill" =~ ^[A-Za-z0-9._-]+$ || "$skill" = "." || "$skill" = ".." || ! -d "$dir" ]]; then
+        echo "Error: no skill named '$skill' in $SKILLS_SRC"
+        return 1
+    fi
+    if [ ! -f "$dir/.source" ]; then
+        echo "$skill: no .source, so it was written here or its source is unknown. Skipped."
+        return 0
+    fi
+
+    local repo path commit ref license notes
+    repo=$(source_get "$skill" repo)
+    path=$(source_get "$skill" path)
+    commit=$(source_get "$skill" commit)
+    ref=$(source_get "$skill" ref)
+    license=$(source_get "$skill" license)
+    notes=$(grep '^#' "$dir/.source")
+    if [ -z "$repo" ] || [ -z "$path" ] || [ -z "$commit" ]; then
+        echo "Error: $skill/.source needs repo, path and commit"
+        return 1
+    fi
+
+    local clone
+    clone=$(clone_repo "$repo") || { echo "Error: $skill: failed to clone $repo"; return 1; }
+
+    local label="HEAD" new_ref=""
+    if [ -n "$ref" ] && git -C "$clone" show-ref -q --verify "refs/tags/$ref"; then
+        # Newest release tag; tags with a hyphen are pre-releases.
+        label=$(git -C "$clone" tag --list --sort=-v:refname | grep -v -- - | head -1)
+        new_ref="$label"
+    elif [ -n "$ref" ]; then
+        label="origin/$ref"
+        new_ref="$ref"
+    fi
+
+    local target
+    target=$(git -C "$clone" rev-parse -q --verify "$label^{commit}") \
+        || { echo "Error: $skill: cannot resolve $label in $repo"; return 1; }
+    if [ "$target" = "$commit" ]; then
+        echo "$skill: up to date (${commit:0:7}${ref:+, $ref})"
+        return 0
+    fi
+    if [ "$path" != "." ] && ! git -C "$clone" cat-file -e "$target:$path" 2>/dev/null; then
+        echo "$skill: $path is gone from $repo at $label."
+        git -C "$clone" log -1 --format='  removed or moved in %h: %s' --diff-filter=D "$commit..$target" -- "$path"
+        return 1
+    fi
+
+    local work="$WORK/$skill"
+    mkdir -p "$work/current"
+    extract_skill "$clone" "$commit" "$path" "$license" "$work/recorded" \
+        && extract_skill "$clone" "$target" "$path" "$license" "$work/new" \
+        || { echo "Error: $skill: failed to read $repo"; return 1; }
+    cp -R "$dir/." "$work/current/" && rm -f "$work/current/.source"
+
+    echo ""
+    echo "$skill: ${commit:0:7} → ${target:0:7}${new_ref:+ ($new_ref)}"
+    git -C "$clone" log --format='  %h %ad %s' --date=short "$commit..$target" -- "$path"
+
+    if ! diff -rq "$work/recorded" "$work/current" > /dev/null; then
+        echo ""
+        echo "  Local edits since ${commit:0:7}, which the update replaces:"
+        (cd "$work" && git diff --no-index --stat recorded current | sed 's/^/  /')
+    fi
+
+    echo ""
+    (cd "$work" && git diff --no-index --stat current new | sed 's/^/  /')
+    local scripts
+    scripts=$(cd "$work" && git diff --no-index --name-only current new | sed 's|^[^/]*/||' | grep -vE '\.md$' | sort -u)
+    if [ -n "$scripts" ]; then
+        echo ""
+        echo "  Files that are not Markdown, so read them before applying:"
+        echo "$scripts" | sed 's/^/    /'
+    fi
+
+    local answer
+    while true; do
+        echo ""
+        read -r -p "Update $skill? [y]es, [d]iff, [N]o: " answer
+        case "$answer" in
+            d|D) (cd "$work" && git diff --no-index current new) ;;
+            y|Y) break ;;
+            *) echo "Skipped $skill"; return 0 ;;
+        esac
+    done
+
+    rm -rf "$dir" && mkdir "$dir" && cp -R "$work/new/." "$dir/" \
+        || { echo "Error: $skill: failed to replace $dir"; return 1; }
+    write_source "$dir" "$repo" "$path" "$target" "$new_ref" "$license" "$notes"
+    echo "Updated $skill to ${target:0:7}${new_ref:+ ($new_ref)}"
+}
+
+update_skills() {
+    if ! command -v git &> /dev/null; then
+        echo "Error: git is required for 'skills update'"
+        return 1
+    fi
+    WORK=$(mktemp -d) || { echo "Error: cannot create temp dir"; return 1; }
+    trap 'rm -rf "$WORK"' EXIT
+
+    local skills=("$@") d failed=0
+    if [ ${#skills[@]} -eq 0 ]; then
+        for d in "$SKILLS_SRC"/*/; do
+            [ -f "$d/.source" ] && skills+=("$(basename "$d")")
+        done
+    fi
+    for d in "${skills[@]}"; do
+        update_skill "$d" || failed=1
+    done
+    return $failed
 }
 
 # Mirror the enabled skills into an app's skills folder as symlinks.
@@ -187,6 +366,9 @@ case "$1" in
         echo "Commands:"
         echo "  pick                           Interactive skill picker"
         echo "  add <repo> --skill <name>      Fetch a skill from a git repo into the source dir"
+        echo "      [--ref <tag-or-branch>]    and record its source; a tag pins it to releases"
+        echo "  update [name...]               Update skills with a .source to their latest upstream"
+        echo "                                 version, showing the changes and asking first"
         echo "  init                           Bootstrap from skills.default (fresh install)"
         ;;
     pick)
@@ -196,14 +378,21 @@ case "$1" in
         shift
         repo=""
         skill=""
+        ref=""
         while [ $# -gt 0 ]; do
             case "$1" in
                 --skill) skill="$2"; [ -n "$skill" ] || { echo "Error: --skill needs a value"; exit 1; }; shift 2 ;;
                 --skill=*) skill="${1#*=}"; shift ;;
+                --ref) ref="$2"; [ -n "$ref" ] || { echo "Error: --ref needs a value"; exit 1; }; shift 2 ;;
+                --ref=*) ref="${1#*=}"; shift ;;
                 *) repo="$1"; shift ;;
             esac
         done
-        add_skill "$repo" "$skill"
+        add_skill "$repo" "$skill" "$ref"
+        ;;
+    update)
+        shift
+        update_skills "$@"
         ;;
     init)
         # Bootstrap from skills.default (for fresh installs)
