@@ -159,10 +159,16 @@ extract_skill() {
     fi
 }
 
-# Newest release tag with the same prefix as ref (v, web/v, release-), or ref
-# itself when nothing newer exists. Pre-release suffixes sort below the release.
+# Newest release tag with the same prefix as ref (v, web3/v, release-), or ref
+# itself when nothing newer exists. Pre-release suffixes sort below the release,
+# and a tag with no trailing version only follows itself.
 newest_release() {
-    local clone="$1" ref="$2" prefix="${2%%[0-9]*}"
+    local clone="$1" ref="$2" prefix
+    prefix=$(printf '%s' "$ref" | sed -E 's/[0-9]+(\.[0-9]+)*(-.*)?$//')
+    if [ "$prefix" = "$ref" ]; then
+        echo "$ref"
+        return
+    fi
     git -C "$clone" -c versionsort.suffix=- tag --list "$prefix*" --sort=-v:refname |
         awk -v p="$prefix" -v ref="$ref" '
             $0 == ref { print; exit }
@@ -226,7 +232,7 @@ update_skill() {
     new_tree=$(git -C "$clone" rev-parse "$(skill_tree "$target" "$path")")
     if [ "$old_tree" = "$new_tree" ] && { [ -z "$license" ] \
         || [ "$(git -C "$clone" rev-parse "$commit:$license")" = "$(git -C "$clone" rev-parse "$target:$license" 2>/dev/null)" ]; }; then
-        if [ "$target" != "$commit" ]; then
+        if [ "$target" != "$commit" ] || [ "${new_ref:-$ref}" != "$ref" ]; then
             write_source "$dir" "$repo" "$path" "$target" "${new_ref:-$ref}" "$license" "$notes"
         fi
         echo "$skill: up to date (${target:0:7}${new_ref:+, $new_ref})"
@@ -304,7 +310,20 @@ update_skills() {
     WORK=$(mktemp -d) || { echo "Error: cannot create temp dir"; return 1; }
     trap 'rm -rf "$WORK"' EXIT
 
-    local skills=("$@") d failed=0
+    # A run stopped between the two renames in update_skill leaves the
+    # previous version in .<name>.old.
+    local d name
+    for d in "$SKILLS_SRC"/.*.old; do
+        [ -d "$d" ] || continue
+        name=$(basename "$d" .old)
+        name="${name#.}"
+        if [ ! -e "$SKILLS_SRC/$name" ]; then
+            mv "$d" "$SKILLS_SRC/$name" && echo "Restored $name from an interrupted update"
+        fi
+        rm -rf "$d" "$SKILLS_SRC/.$name.new"
+    done
+
+    local skills=("$@") failed=0
     if [ ${#skills[@]} -eq 0 ]; then
         for d in "$SKILLS_SRC"/*/; do
             [ -f "$d/.source" ] && skills+=("$(basename "$d")")
