@@ -5,7 +5,9 @@
 # Print the branch other branches are compared against: origin's HEAD, else
 # the first of origin/main, origin/master, main and master that exists.
 
-if base=$(git symbolic-ref -q --short refs/remotes/origin/HEAD); then
+# fetch --prune leaves origin/HEAD pointing at a deleted branch after a rename.
+if base=$(git symbolic-ref -q --short refs/remotes/origin/HEAD) &&
+  git rev-parse -q --verify "refs/remotes/$base^{commit}" >/dev/null; then
   echo "$base"
   exit 0
 fi

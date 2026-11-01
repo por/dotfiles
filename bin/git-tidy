@@ -21,13 +21,15 @@ keep=$(
 )
 
 # Every file the branch ever touched is identical in base: nothing on the
-# branch, including a later partial revert, is missing from base.
+# branch, including a later partial revert, is missing from base. A branch of
+# only empty commits touched nothing and is not merged.
 squash_merged() {
-  local ref="refs/heads/$1" mb
+  local ref="refs/heads/$1" mb touched
   mb=$(git merge-base "$base" "$ref") || return 1
   # diff-tree, unlike log and diff, ignores diff.relative and diff.ignoreSubmodules.
-  [ -z "$(LC_ALL=C comm -12 \
-    <(git rev-list "$mb..$ref" | git diff-tree --stdin -r -m --root --no-commit-id --name-only --no-renames | LC_ALL=C sort -u) \
+  touched=$(git rev-list "$mb..$ref" | git diff-tree --stdin -r -m --root --no-commit-id --name-only --no-renames | LC_ALL=C sort -u)
+  [ -n "$touched" ] && [ -z "$(LC_ALL=C comm -12 \
+    <(printf '%s\n' "$touched") \
     <(git diff-tree -r --name-only --no-renames "$base" "$ref" | LC_ALL=C sort -u))" ]
 }
 
