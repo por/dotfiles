@@ -1,4 +1,3 @@
-cask_args appdir: '/Applications'
 
 # Utils
 brew 'act'                # Run your GitHub Actions locally
