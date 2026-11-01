@@ -1,144 +1,69 @@
-autoload colors && colors
+zmodload zsh/datetime
+autoload -Uz add-zsh-hook
 
-# Locate git executable for prompt functions below.
-# Fallback needed because git location varies by architecture when not in PATH.
-if (( $+commands[git] ))
-then
-  git="$commands[git]"
+if [[ -n $SSH_CONNECTION || -n $SSH_CLIENT ]]; then
+  _prompt_user='%F{cyan}%n@%m%f'
 else
-  # Check architecture-specific locations:
-  # ARM64: /opt/homebrew/bin/git, Intel: /usr/local/bin/git, System: /usr/bin/git
-  for gitpath in /opt/homebrew/bin/git /usr/local/bin/git /usr/bin/git; do
-    if [[ -x "$gitpath" ]]; then
-      git="$gitpath"
-      break
-    fi
-  done
-  git="${git:-git}"
+  _prompt_user='%F{cyan}%n%f'
 fi
 
-git_branch() {
-  echo $($git symbolic-ref HEAD 2>/dev/null | awk -F/ {'print $NF'})
-}
+# One git status and one git log per prompt. --no-optional-locks keeps the
+# prompt from taking index.lock while another git command is running.
+_prompt_git_info() {
+  _prompt_git=
+  local out line oid head dirty
+  out=$(git --no-optional-locks status --porcelain=v2 --branch --untracked-files=normal 2>/dev/null) || return
 
-git_dirty() {
-  GIT_PROMPT_PREFIX=" %F{yellow}("
-  GIT_PROMPT_SUFFIX="%F{yellow})%f "
-  GIT_PROMPT_CLEAN="%F{green}*%f"
-  GIT_PROMPT_DIRTY="%F{red}*%f"
-  GIT_PROMPT_UNTRACKED="%F{cyan}*%f"
+  for line in ${(f)out}; do
+    case $line in
+      '# branch.oid '*)  oid=${line#\# branch.oid } ;;
+      '# branch.head '*) head=${line#\# branch.head } ;;
+      '#'*) ;;
+      *) dirty=1; break ;;
+    esac
+  done
 
-  if $(! $git status -s &> /dev/null)
-  then
-    echo ""
-  else
-    if [[ $($git status --porcelain) == "" ]]
-    then
-      echo "$GIT_PROMPT_PREFIX$(git_prompt_info)$GIT_PROMPT_CLEAN$GIT_PROMPT_SUFFIX"
-    else
-      echo "$GIT_PROMPT_PREFIX$(git_prompt_info)$GIT_PROMPT_DIRTY$GIT_PROMPT_SUFFIX"
+  [[ $head == '(detached)' ]] && head=${oid[1,7]}
+
+  local star=green
+  [[ -n $dirty ]] && star=red
+  _prompt_git=" %F{yellow}(${head//\%/%%}%F{$star}*%f%F{yellow})%f "
+
+  if [[ $oid == '(initial)' ]]; then
+    _prompt_git+='%F{cyan}~ %f'
+    return
+  fi
+
+  local last=$(git log -1 --format=%at 2>/dev/null)
+  [[ -n $last ]] || return
+  local secs=$(( EPOCHSECONDS - last ))
+  local minutes=$(( secs / 60 )) hours=$(( secs / 3600 )) days=$(( secs / 86400 ))
+
+  # Time since the last commit: cyan when clean, otherwise green, yellow after
+  # 10 minutes and red after 30
+  local color=cyan
+  if [[ -n $dirty ]]; then
+    if (( minutes > 30 )); then color=red
+    elif (( minutes > 10 )); then color=yellow
+    else color=green
     fi
   fi
-}
 
-git_prompt_info () {
- ref=$($git symbolic-ref HEAD 2>/dev/null) || return
-# echo "(%{\e[0;33m%}${ref#refs/heads/}%{\e[0m%})"
- echo "${ref#refs/heads/}"
-}
-
-unpushed () {
-  $git cherry -v @{upstream} 2>/dev/null
-}
-
-need_push () {
-  if [[ $(unpushed) == "" ]]
-  then
-    echo " "
+  if (( hours > 24 )); then
+    _prompt_git+="%F{$color}${days}d$(( hours % 24 ))h$(( minutes % 60 ))m%f"
+  elif (( minutes > 60 )); then
+    _prompt_git+="%F{$color}${hours}h$(( minutes % 60 ))m%f"
   else
-    echo "%{$fg[yellow]%}[%{$reset_color%}%{$fg[red]%}unpushed%{$reset_color%}%{$fg[yellow]%}]%{$reset_color%} "
+    _prompt_git+="%F{$color}${minutes}m%f"
   fi
 }
 
-directory_name() {
-  if [[ -n $SSH_CONNECTION ]] || [[ -n $SSH_CLIENT ]]; then
-    echo "%F{cyan}%n@%m%f %F{green}%c%f"
-  else
-    echo "%F{cyan}%n%f %F{green}%c%f"
-  fi
-}
-
-function git_time_since_commit() {
-  TIME_SINCE_COMMIT_SHORT="%F{green}"
-  TIME_SHORT_COMMIT_MEDIUM="%F{yellow}"
-  TIME_SINCE_COMMIT_LONG="%F{red}"
-  TIME_SINCE_COMMIT_NEUTRAL="%F{cyan}"
-
-  if git rev-parse --git-dir > /dev/null 2>&1; then
-    # Only proceed if there is actually a commit.
-    if [[ $(git log 2>&1 > /dev/null | grep -c "^fatal: bad default revision") == 0 ]]; then
-      # Get the last commit.
-      last_commit=`git log --pretty=format:'%at' -1 2> /dev/null`
-      now=`date +%s`
-      seconds_since_last_commit=$((now-last_commit))
-
-      # Totals
-      MINUTES=$((seconds_since_last_commit / 60))
-      HOURS=$((seconds_since_last_commit/3600))
-
-      # Sub-hours and sub-minutes
-      DAYS=$((seconds_since_last_commit / 86400))
-      SUB_HOURS=$((HOURS % 24))
-      SUB_MINUTES=$((MINUTES % 60))
-
-      if [[ -n $(git status -s 2> /dev/null) ]]; then
-        if [ "$MINUTES" -gt 30 ]; then
-          COLOR="$TIME_SINCE_COMMIT_LONG"
-        elif [ "$MINUTES" -gt 10 ]; then
-          COLOR="$TIME_SHORT_COMMIT_MEDIUM"
-        else
-          COLOR="$TIME_SINCE_COMMIT_SHORT"
-        fi
-      else
-        COLOR="$TIME_SINCE_COMMIT_NEUTRAL"
-      fi
-
-      if [ "$HOURS" -gt 24 ]; then
-        echo "$COLOR${DAYS}d${SUB_HOURS}h${SUB_MINUTES}m%f"
-      elif [ "$MINUTES" -gt 60 ]; then
-        echo "$COLOR${HOURS}h${SUB_MINUTES}m%f"
-      else
-        echo "$COLOR${MINUTES}m%f"
-      fi
-    else
-      COLOR="$TIME_SINCE_COMMIT_NEUTRAL"
-      echo "$COLOR~ "
-    fi
-  fi
-}
-
-function check_last_exit_code() {
-  local LAST_EXIT_CODE=$?
-  if [[ $LAST_EXIT_CODE -ne 0 ]]; then
-    local EXIT_CODE_PROMPT=' '
-    EXIT_CODE_PROMPT+="%F{red}-%f"
-    EXIT_CODE_PROMPT+="%F{red}$LAST_EXIT_CODE%f"
-    EXIT_CODE_PROMPT+="%F{red}-%f"
-    echo "$EXIT_CODE_PROMPT"
-  fi
-}
-
-function prompt_char {
-  echo " %F{red}%(!.#.»)%f "
-}
-
-export PROMPT=$'$(directory_name)$(git_dirty)$(git_time_since_commit)$(prompt_char)'
-
-set_prompt () {
-  export RPROMPT=$'%F{blue}%~%f$(check_last_exit_code)'
-}
-
-precmd() {
+_prompt_title() {
   title "zsh" "%m" "%55<...<%~"
-  set_prompt
 }
+
+add-zsh-hook precmd _prompt_title
+add-zsh-hook precmd _prompt_git_info
+
+PROMPT='${_prompt_user} %F{green}%c%f${_prompt_git} %F{red}%(!.#.»)%f '
+RPROMPT='%F{blue}%~%f%(?.. %F{red}-%?-%f)'
